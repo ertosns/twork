@@ -1,0 +1,804 @@
+
+parse.tab.h,934
+# define YY_YY_PARSE_TAB_H_INCLUDED34,1549
+# define YYDEBUG 37,1622
+# define YYTOKENTYPE45,1727
+  enum yytokentype46,1748
+    SQL 48,1771
+    EXIT 49,1786
+    NAME 50,1802
+    INTEGER 51,1818
+    DOUBLE 52,1837
+    PASSCODE 53,1855
+    PATH 54,1875
+    HOURS 55,1891
+    MINUTES 56,1908
+    SECONDS 57,1927
+    DEFINITION 58,1946
+    SLITERAL 59,1968
+    EOL 60,1988
+    START 61,2003
+    STOP 62,2020
+    EVENT 63,2036
+    UNDO 64,2053
+    REDO 65,2069
+    CREATE 66,2085
+    ACCUMULATE 67,2103
+    INSERT 68,2125
+    UPDATE 69,2143
+    ALTER 70,2161
+    LINK 71,2178
+    ADD_LINKABLE 72,2194
+    PRINT_COLUMNS 73,2218
+    DOES_TABLE_EXIST 74,2243
+    VIEW_LAST_RECORDS 75,2271
+    REMOVE_LAST_RECORD 76,2300
+    DROP_TABLE 77,2330
+    GET_CURRENT_TASK 78,2352
+union YYSTYPE85,2467
+typedef union YYSTYPE YYSTYPE;98,2659
+# define YYSTYPE_IS_TRIVIAL 99,2690
+# define YYSTYPE_IS_DECLARED 100,2720
+
+src/parse.y,126
+  KeyVal *keyvalptr;keyvalptr33,
+  Val *val;val34,
+  char *chars;chars35,
+  int inttype;36,
+  long double ldouble;37,
+
+src/debug.c,76
+void error(3,20
+void highlight(8,94
+void terminal(13,175
+void db(18,252
+
+src/loc.c,950
+String DEV_PATH;9,203
+const String AUTHOR 10,220
+const String LOC 11,253
+const String SUBMODULE 12,279
+const String COMMIT 13,318
+const String POSE 14,350
+const String NEGE 15,382
+const int LOC_COL_SIZE 16,414
+const String HASH 17,442
+const String ADDITION 18,470
+const String DELETION 19,506
+const String POS 20,542
+const String NEG 21,569
+const int MAX_LINE_CHARS 22,596
+const String WRONG_PATH 23,628
+const String WRONG_GIT_ADD 24,687
+const String WRONG_GIT_COMMIT 25,740
+const String WRONG_GIT_PUSH 26,799
+const String TWORK_DEVELOP 27,851
+String DEFAULT_MSG 28,897
+String GIT_LOG;29,937
+String GIT_DIFF;30,953
+String GIT_ADD;31,970
+String GIT_COMMIT;32,986
+String GIT_PUSH;33,1005
+void initloc(36,1088
+struct HASH 46,1636
+  struct HASH *nxt;nxt47,1650
+  String col;48,1670
+  String hash;49,1684
+} hashes;50,1699
+struct HASH *shash shash51,1709
+void yieldloc 55,1836
+int storecommits(74,2505
+int loc(171,5578
+
+src/debug.h,198
+#define END	3,20
+#define ANSI_EC_BOLD 4,45
+#define ANSI_EC_BLINK 5,77
+#define ANSI_EC_RED	6,110
+#define ANSI_EC_YELLOW 7,144
+#define ANSI_EC_BLUE	8,179
+#define DEBUG9,213
+int dbgmode;11,228
+
+src/crud.h,18
+#define CRUD4,40
+
+src/atrack.h,504
+#define ATRACK7,99
+typedef struct session 8,114
+    String date;9,139
+    String task;10,156
+    String window;11,173
+    int keying;12,192
+    int mousing;13,208
+} session;14,225
+session *cursession;cursession16,237
+const String SESSIONS;19,285
+const String START_DATE;20,321
+const String LINKABLE_TASK;22,396
+const String WINDOW;23,424
+const String KEYING_FREQ;24,445
+const String MOUSING_FREQ;25,471
+const String WINDOW;28,524
+const String WINDOW_NAME;29,545
+String CUR_TASK;30,571
+
+src/utils.h,2501
+#define _XOPEN_SOURCE1,0
+#define UTILS12,199
+#define TRUE 13,213
+#define FALSE 14,228
+#define LEVEL 15,244
+#define dbg 16,266
+#define asize(19,498
+int i,20,550
+int i, def_sdt_type,20,550
+int i, def_sdt_type, rule;20,550
+typedef char *String;String21,577
+typedef long  Date[Date22,599
+enum {crt=crt23,622
+enum {crt=1, ins=23,622
+enum {crt=1, ins=2, upt=23,622
+enum debug 24,650
+enum debug {NONE NONE24,650
+enum debug {NONE = 1, VERBOSE=24,650
+enum success 25,684
+enum success {SUCCESS SUCCESS25,684
+enum success {SUCCESS = 1, FAILED 25,684
+enum response 26,724
+enum response {errorres errorres26,724
+enum response {errorres = 1, tableres 26,724
+enum sqltype{sqltype27,768
+enum sqltype{createcmd=createcmd27,768
+enum sqltype{createcmd=1,insertcmd=27,768
+enum sqltype{createcmd=1,insertcmd=2,updatecmd=27,768
+enum sqltype{createcmd=1,insertcmd=2,updatecmd=3,altercmd=27,768
+enum valtype 28,830
+enum valtype {sqlvalue=sqlvalue28,830
+enum valtype {sqlvalue=1,sqltype=28,830
+enum datatype{datatype29,867
+enum datatype{sdt_type sdt_type29,867
+enum datatype{sdt_type = 1,sdt_number 29,867
+enum datatype{sdt_type = 1,sdt_number = 2,sdt_double 29,867
+              sdt_string 30,925
+              sdt_string = 3,sdt_blob 30,925
+              sdt_string = 3,sdt_blob = 4,sdt_date 30,925
+enum floatype{floatype31,982
+enum floatype{FLOAT_NUM=FLOAT_NUM31,982
+enum floatype{FLOAT_NUM=1, DOUBLE_NUM=31,982
+enum floatype{FLOAT_NUM=1, DOUBLE_NUM=2, LDOUBLE_NUM=31,982
+typedef struct Blob32,1039
+    String bytes;34,1061
+        int size;35,1079
+} Blob;36,1097
+typedef struct Val37,1105
+        String strep;39,1126
+        int valtype;40,1148
+} Val;41,1169
+typedef struct KeyVal42,1176
+        struct KeyVal *parent;parent44,1200
+        String key;45,1231
+        Val *val;val46,1251
+        int size;47,1269
+} KeyVal;48,1287
+        int status;51,1314
+        String command;52,1334
+        String err;53,1358
+} Err;54,1378
+typedef struct Row59,1496
+        struct Row *nxt;nxt61,1517
+        String *val;val62,1542
+} Row;63,1563
+typedef struct Table65,1571
+    Row *row;row67,1594
+        Row *current;current68,1617
+    int size;69,1666
+        int ncol;70,1680
+        int *coltype;coltype72,1720
+        String *colname;colname73,1742
+} Table;74,1767
+typedef struct Result76,1777
+    int type;78,1801
+        Err *err;err81,1831
+        Table *table;table82,1849
+} Result;84,1878
+String SQL_DATE_FORMAT;87,1890
+
+src/loc.h,54
+#define LOC_HDR5,62
+const String TWORK_DEVELOP;6,78
+
+src/alarm.h,19
+#define ALARM4,40
+
+src/alarm.c,166
+String ALERT_DIR;11,159
+String PLAYER 12,177
+int initalarm(14,209
+void localalert 38,695
+void networkalert 71,1585
+void signalalert 73,1610
+void alert 78,1680
+
+src/crud.c,1262
+static sqlite3 *database;database10,139
+static sqlite3_stmt *stm;stm11,165
+static Table *table;table12,191
+static char *err_msg;err_msg13,212
+String cmdsuccess 14,234
+String USR_DB;15,274
+String DEV_DB 16,289
+void initcrud(18,334
+Err* handleError(24,462
+void handleRes(41,988
+void viewTable(57,1430
+int readTable(82,2377
+int notexist(120,3433
+void initDB(136,3836
+String getSqlDateType(149,4219
+Val *makevalptr(makevalptr166,4618
+Val makeval(183,5092
+KeyVal* makekeyval 188,5204
+KeyVal* addkeyval(198,5429
+void exec(205,5558
+int validpasscode(243,6476
+void addblob(246,6527
+Table *copyTable copyTable249,6580
+Result *sqlprologue(sqlprologue294,7872
+int sqlCreate(310,8266
+Result *sqlReadFull(sqlReadFull338,9036
+Result *sqlRead(sqlRead342,9131
+Result *sqlReadGrouped(sqlReadGrouped346,9296
+Result *readTables(readTables388,10630
+int sqlInsert(405,11011
+int sqlAlter(471,12828
+int sqlUpdate(498,13535
+int deleteTable(551,15037
+int deleteRecords(567,15432
+int deleteLastRow(578,15763
+void handleregex(597,16263
+String *acolumns(acolumns606,16475
+String *atrimedcolumns(atrimedcolumns634,17328
+int colexist(644,17594
+int lastrowid(653,17832
+int nrow(660,17996
+Row *rowi(rowi667,18151
+String colval(682,18453
+
+src/utils.c,442
+char *dash dash6,78
+char *colon colon7,96
+char *space space8,115
+String SQL_DATE_FORMAT 9,134
+String cat 11,181
+int floatdigitsize(36,919
+String itos(43,1035
+String ftos(59,1412
+String removeColFlag(66,1541
+String prependType(74,1723
+int getDataType(105,2290
+String tm2ts(137,3009
+String getDateTime(143,3158
+int isdirectory(150,3287
+int isfiler(154,3359
+int isfilew(158,3430
+int isfilerw(162,3501
+int assertcmd(166,3574
+
+src/linker.h,124
+#define LINKER7,78
+String LINKABLES;10,95
+String DAILY_TERMINATED;11,113
+String NAME_COL;12,138
+String TYPE_COL;13,155
+
+src/atrack.c,259
+int old_x_root,15,236
+int old_x_root, old_y_root;15,236
+void initatrack(16,264
+String getwindow_name 22,399
+String add_window(35,817
+void push_session(55,1412
+void set_window(83,2446
+void inckeying(94,2697
+void incmousing(98,2745
+int track(102,2815
+
+src/linker.c,290
+String LINKABLES 6,63
+String DAILY_TERMINATED 7,95
+String PUSH_COL 8,134
+String NAME_COL 9,160
+String* listlinkables(14,267
+int linkablexists(40,842
+int linkabletype(51,1092
+int addlinkable(71,1451
+int isfresh(94,2173
+int removelinkable(107,2648
+int link_accumulatables(116,2935
+
+src/clock.h,539
+#define CLOCK6,59
+const int accumulatable;25,420
+const int naccumulatable;26,445
+String STATE;27,471
+String VAL;28,485
+String DATE;29,497
+enum statetype 31,521
+  event 32,538
+  start 33,570
+  stop 34,603
+  push 35,621
+  none 36,655
+  undo 37,668
+typedef struct State 40,709
+  int type;41,732
+  struct tm *date;date42,744
+  long double val;43,763
+  int rowid;44,782
+} State;45,795
+typedef struct Hist 51,968
+  State *current;current52,990
+  struct Hist *previous;previous53,1008
+  int size;54,1033
+} Hist;55,1045
+
+src/clock.c,536
+#define LOCHEADER6,79
+const int accumulatable 11,169
+const int naccumulatable 12,198
+String STATE 13,228
+String VAL 14,252
+String DATE 15,272
+Hist *addhist(addhist17,312
+void pophist(32,699
+void createTclk(36,762
+int insertts(42,935
+String strstate(67,1442
+int validstate(79,1701
+void tableres2states(122,2978
+State *zerostate(zerostate134,3389
+State *accumulate accumulate145,3622
+int startst(187,4942
+int stopst(200,5258
+int eventst(210,5463
+State *state(state218,5654
+int undost(233,5989
+int redost(243,6246
+
+lex.yy.c,6190
+#define  YY_INT_ALIGNED 4,21
+#define FLEX_SCANNER8,99
+#define YY_FLEX_MAJOR_VERSION 9,120
+#define YY_FLEX_MINOR_VERSION 10,152
+#define YY_FLEX_SUBMINOR_VERSION 11,184
+#define FLEX_BETA13,252
+#define FLEXINT_H29,550
+#define __STDC_LIMIT_MACROS 39,861
+typedef int8_t flex_int8_t;43,921
+typedef uint8_t flex_uint8_t;44,949
+typedef int16_t flex_int16_t;45,979
+typedef uint16_t flex_uint16_t;46,1009
+typedef int32_t flex_int32_t;47,1041
+typedef uint32_t flex_uint32_t;48,1071
+typedef signed char flex_int8_t;50,1109
+typedef short int flex_int16_t;51,1142
+typedef int flex_int32_t;52,1174
+typedef unsigned char flex_uint8_t;53,1200
+typedef unsigned short int flex_uint16_t;54,1237
+typedef unsigned int flex_uint32_t;55,1279
+#define INT8_MIN 59,1365
+#define INT16_MIN 62,1428
+#define INT32_MIN 65,1495
+#define INT8_MAX 68,1566
+#define INT16_MAX 71,1628
+#define INT32_MAX 74,1692
+#define UINT8_MAX 77,1761
+#define UINT16_MAX 80,1825
+#define UINT32_MAX 83,1891
+#define yyconst 91,2039
+#define yynoreturn 94,2101
+#define yynoreturn96,2156
+#define YY_NULL 100,2216
+#define YY_SC_TO_UI(107,2463
+#define BEGIN 113,2694
+#define YY_START 119,2893
+#define YYSTATE 120,2933
+#define YY_STATE_EOF(123,3016
+#define YY_NEW_FILE 126,3136
+#define YY_END_OF_BUFFER_CHAR 128,3175
+#define YY_BUF_SIZE 137,3441
+#define YY_BUF_SIZE 139,3473
+#define YY_STATE_BUF_SIZE 145,3623
+#define YY_TYPEDEF_YY_BUFFER_STATE148,3731
+typedef struct yy_buffer_state *YY_BUFFER_STATE;YY_BUFFER_STATE149,3766
+#define YY_TYPEDEF_YY_SIZE_T153,3852
+typedef size_t yy_size_t;154,3881
+#define EOB_ACT_CONTINUE_SCAN 161,3963
+#define EOB_ACT_END_OF_FILE 162,3995
+#define EOB_ACT_LAST_MATCH 163,4025
+    #define  YY_LESS_LINENO(172,4556
+    #define YY_LINENO_REWIND_TO(179,4795
+#define yyless(188,5120
+#define unput(201,5475
+#define YY_STRUCT_YY_BUFFER_STATE204,5555
+struct yy_buffer_state205,5589
+	FILE *yy_input_file;yy_input_file207,5615
+	char *yy_ch_buf;yy_ch_buf209,5638
+	char *yy_buf_pos;yy_buf_pos210,5676
+	int yy_buf_size;215,5819
+	int yy_n_chars;220,5923
+	int yy_is_our_buffer;226,6085
+	int yy_is_interactive;233,6323
+	int yy_at_bol;239,6490
+    int yy_bs_lineno;241,6507
+    int yy_bs_column;242,6553
+	int yy_fill_buffer;247,6684
+	int yy_buffer_status;249,6706
+#define YY_BUFFER_NEW 251,6730
+#define YY_BUFFER_NORMAL 252,6754
+#define YY_BUFFER_EOF_PENDING 263,7252
+static size_t yy_buffer_stack_top 269,7360
+static size_t yy_buffer_stack_max 270,7430
+static YY_BUFFER_STATE * yy_buffer_stack 271,7496
+#define YY_CURRENT_BUFFER 279,7767
+#define YY_CURRENT_BUFFER_LVALUE 286,8063
+static char yy_hold_char;289,8205
+static int yy_n_chars;290,8231
+int yyleng;291,8302
+static char *yy_c_buf_p yy_c_buf_p294,8360
+static int yy_init 295,8392
+static int yy_start 296,8453
+static int yy_did_buffer_switch_on_eof;301,8632
+#define YY_FLUSH_BUFFER 315,9152
+#define yy_new_buffer 325,9488
+#define yy_set_interactive(327,9528
+#define yy_set_bol(337,9804
+#define YY_AT_BOL(347,10047
+#define yywrap(351,10130
+#define YY_SKIP_YYWRAP352,10164
+typedef unsigned char YY_CHAR;354,10188
+FILE *yyin yyin356,10220
+typedef int yy_state_type;358,10255
+int yylineno 362,10305
+#undef yytext_ptr366,10363
+#define yytext_ptr 368,10388
+#define YY_DO_BEFORE_ACTION 378,10751
+#define YY_NUM_RULES 385,10911
+#define YY_END_OF_BUFFER 386,10935
+struct yy_trans_info389,11044
+	flex_int32_t yy_verify;391,11068
+	flex_int32_t yy_nxt;392,11093
+static yyconst flex_int16_t yy_accept[yy_accept394,11119
+static yyconst YY_CHAR yy_ec[yy_ec428,12999
+static yyconst YY_CHAR yy_meta[yy_meta460,14716
+static yyconst flex_uint16_t yy_base[yy_base470,15144
+static yyconst flex_int16_t yy_def[yy_def511,17414
+static yyconst flex_uint16_t yy_nxt[yy_nxt552,19682
+static yyconst flex_int16_t yy_chk[yy_chk625,23803
+static yyconst flex_int32_t yy_rule_can_match_eol[yy_rule_can_match_eol699,27978
+static yy_state_type yy_last_accepting_state;704,28169
+static char *yy_last_accepting_cpos;yy_last_accepting_cpos705,28215
+int yy_flex_debug 708,28279
+#define REJECT 713,28405
+#define yymore(714,28449
+#define YY_MORE_ADJ 715,28495
+#define YY_RESTORE_YY_MORE_OFFSET716,28517
+char *yytext;yytext717,28551
+#define INITIAL 733,28801
+#define YY_EXTRA_TYPE 744,29103
+#define YY_READ_BUF_SIZE 818,30421
+#define YY_READ_BUF_SIZE 820,30458
+#define ECHO 829,30698
+#define YY_INPUT(836,30917
+#define yyterminate(873,31837
+#define YY_START_STACK_INCR 878,31972
+#define YY_FATAL_ERROR(883,32062
+#define YY_DECL_IS_OURS 892,32295
+#define YY_DECL 896,32348
+#define YY_USER_ACTION903,32524
+#define YY_BREAK 908,32617
+#define YY_RULE_SETUP 911,32659
+case YY_STATE_EOF(1249,38322
+static int yy_get_next_buffer 1389,42195
+    static yy_state_type yy_get_previous_state 1523,45758
+    static yy_state_type yy_try_NUL_trans 1555,46633
+    static void yyunput 1580,47300
+    static int yyinput 1625,48378
+    void yyrestart 1707,50177
+    void yy_switch_to_buffer 1724,50538
+static void yy_load_buffer_state 1755,51381
+    YY_BUFFER_STATE yy_create_buffer 1769,51854
+    void yy_delete_buffer 1797,52556
+    static void yy_init_buffer 1816,53005
+    void yy_flush_buffer 1844,53738
+void yypush_buffer_state 1873,54424
+void yypop_buffer_state 1903,55189
+static void yyensure_buffer_stack 1922,55584
+YY_BUFFER_STATE yy_scan_buffer 1971,57251
+YY_BUFFER_STATE yy_scan_string 2008,58330
+YY_BUFFER_STATE yy_scan_bytes 2021,58753
+#define YY_EXIT_FAILURE 2052,59494
+static void yynoreturn yy_fatal_error 2055,59528
+#undef yyless2063,59716
+#define yyless(2064,59730
+int yyget_lineno 2083,60189
+FILE *yyget_in yyget_in2092,60279
+FILE *yyget_out yyget_out2100,60363
+int yyget_leng 2108,60463
+char *yyget_text yyget_text2117,60550
+void yyset_lineno 2126,60679
+void yyset_in 2138,60907
+void yyset_out 2143,60970
+int yyget_debug 2148,61037
+void yyset_debug 2153,61096
+static int yy_init_globals 2158,61168
+int yylex_destroy 2190,61924
+static void yy_flex_strncpy 2216,62478
+static int yy_flex_strlen 2226,62633
+void *yyalloc yyalloc2236,62741
+void *yyrealloc yyrealloc2241,62803
+void yyfree 2254,63242
+#define YYTABLES_NAME 2259,63338
+
+src/lex.l,108
+YY_RULE_SETUP59,
+YY_RULE_SETUP66,
+YY_RULE_SETUP71,
+YY_RULE_SETUP76,
+YY_RULE_SETUP81,
+YY_RULE_SETUP97,
+
+parse.tab.c,6977
+#define YYBISON 44,2037
+#define YYBISON_VERSION 47,2078
+#define YYSKELETON_NAME 50,2133
+#define YYPURE 53,2188
+#define YYPUSH 56,2227
+#define YYPULL 59,2266
+#   define YY_NULLPTR 98,3045
+#   define YY_NULLPTR 100,3083
+# undef YYERROR_VERBOSE106,3188
+# define YYERROR_VERBOSE 107,3212
+# define YYERROR_VERBOSE 109,3245
+# define YY_YY_PARSE_TAB_H_INCLUDED115,3412
+# define YYDEBUG 118,3485
+# define YYTOKENTYPE126,3590
+  enum yytokentype127,3611
+    SQL 129,3634
+    EXIT 130,3649
+    NAME 131,3665
+    INTEGER 132,3681
+    DOUBLE 133,3700
+    PASSCODE 134,3718
+    PATH 135,3738
+    HOURS 136,3754
+    MINUTES 137,3771
+    SECONDS 138,3790
+    DEFINITION 139,3809
+    SLITERAL 140,3831
+    EOL 141,3851
+    START 142,3866
+    STOP 143,3883
+    EVENT 144,3899
+    UNDO 145,3916
+    REDO 146,3932
+    CREATE 147,3948
+    ACCUMULATE 148,3966
+    INSERT 149,3988
+    UPDATE 150,4006
+    ALTER 151,4024
+    LINK 152,4041
+    ADD_LINKABLE 153,4057
+    PRINT_COLUMNS 154,4081
+    DOES_TABLE_EXIST 155,4106
+    VIEW_LAST_RECORDS 156,4134
+    REMOVE_LAST_RECORD 157,4163
+    DROP_TABLE 158,4193
+    GET_CURRENT_TASK 159,4215
+union YYSTYPE166,4330
+typedef union YYSTYPE YYSTYPE;179,4521
+# define YYSTYPE_IS_TRIVIAL 180,4552
+# define YYSTYPE_IS_DECLARED 181,4582
+# undef short196,4817
+typedef YYTYPE_UINT8 yytype_uint8;200,4859
+typedef unsigned char yytype_uint8;202,4900
+typedef YYTYPE_INT8 yytype_int8;206,4963
+typedef signed char yytype_int8;208,5002
+typedef YYTYPE_UINT16 yytype_uint16;212,5064
+typedef unsigned short int yytype_uint16;214,5107
+typedef YYTYPE_INT16 yytype_int16;218,5177
+typedef short int yytype_int16;220,5218
+#  define YYSIZE_T 225,5297
+#  define YYSIZE_T 227,5352
+#  define YYSIZE_T 230,5461
+#  define YYSIZE_T 232,5494
+#define YYSIZE_MAXIMUM 236,5542
+#   define YY_(242,5712
+#  define YY_(246,5798
+#  define YY_ATTRIBUTE(254,6055
+#  define YY_ATTRIBUTE(256,6111
+# define YY_ATTRIBUTE_PURE 261,6194
+# define YY_ATTRIBUTE_UNUSED 265,6285
+#  define _Noreturn 271,6482
+#  define _Noreturn 273,6531
+# define YYUSE(279,6691
+# define YYUSE(281,6728
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN 286,6903
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END 290,7113
+# define YY_INITIAL_VALUE(293,7199
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN296,7289
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END297,7334
+# define YY_INITIAL_VALUE(300,7409
+#    define YYSTACK_ALLOC 311,7657
+#    define YYSTACK_ALLOC 315,7820
+#    define alloca 318,7940
+#    define YYSTACK_ALLOC 320,7976
+#      define EXIT_SUCCESS 325,8206
+#  define YYSTACK_FREE(334,8356
+#   define YYSTACK_ALLOC_MAXIMUM 340,8746
+#  define YYSTACK_ALLOC 343,8828
+#  define YYSTACK_FREE 344,8861
+#   define YYSTACK_ALLOC_MAXIMUM 346,8923
+#    define EXIT_SUCCESS 353,9220
+#   define YYMALLOC 357,9285
+#   define YYFREE 363,9458
+union yyalloc377,9854
+  yytype_int16 yyss_alloc;379,9870
+  YYSTYPE yyvs_alloc;380,9897
+# define YYSTACK_GAP_MAXIMUM 384,9998
+# define YYSTACK_BYTES(388,10146
+# define YYCOPY_NEEDED 392,10261
+# define YYSTACK_RELOCATE(399,10570
+#   define YYCOPY(417,11449
+#   define YYCOPY(420,11555
+#define YYFINAL 433,12024
+#define YYLAST 435,12084
+#define YYNTOKENS 438,12146
+#define YYNNTS 440,12209
+#define YYNRULES 442,12264
+#define YYNSTATES 444,12323
+#define YYUNDEFTOK 448,12462
+#define YYMAXUTOK 449,12484
+#define YYTRANSLATE(451,12509
+static const yytype_uint8 yytranslate[yytranslate456,12785
+static const yytype_uint16 yyrline[yyrline491,15026
+static const char *const yytname[yytname506,15697
+static const yytype_uint16 yytoknum[yytoknum525,16628
+#define YYPACT_NINF 534,16931
+#define yypact_value_is_default(536,16956
+#define YYTABLE_NINF 539,17027
+#define yytable_value_is_error(541,17052
+static const yytype_int8 yypact[yypact546,17194
+static const yytype_uint8 yydefact[yydefact561,17970
+static const yytype_int8 yypgoto[yypgoto574,18592
+static const yytype_int8 yydefgoto[yydefgoto582,18870
+static const yytype_uint8 yytable[yytable592,19323
+static const yytype_int8 yycheck[yycheck604,19929
+static const yytype_uint8 yystos[yystos618,20635
+static const yytype_uint8 yyr1[yyr1631,21295
+static const yytype_uint8 yyr2[yyr2643,21859
+#define yyerrok 655,22348
+#define yyclearin 656,22390
+#define YYEMPTY 657,22433
+#define YYEOF 658,22462
+#define YYACCEPT 660,22489
+#define YYABORT 661,22530
+#define YYERROR 662,22570
+#define YYRECOVERING(665,22612
+#define YYBACKUP(667,22653
+#define YYTERROR 685,23668
+#define YYERRCODE 686,23694
+#  define YYFPRINTF 695,23851
+# define YYDPRINTF(698,23888
+# define YY_LOCATION_PRINT(706,24184
+# define YY_SYMBOL_PRINT(710,24242
+yy_symbol_value_print 727,25043
+yy_symbol_print 746,25442
+yy_stack_print 761,26006
+# define YY_STACK_PRINT(772,26256
+yy_reduce_print 784,26703
+# define YY_REDUCE_PRINT(803,27311
+int yydebug;811,27601
+# define YYDPRINTF(813,27635
+# define YY_SYMBOL_PRINT(814,27660
+# define YY_STACK_PRINT(815,27715
+# define YY_REDUCE_PRINT(816,27752
+# define YYINITDEPTH 822,27886
+# define YYMAXDEPTH 833,28242
+#   define yystrlen 841,28361
+yystrlen 845,28447
+#   define yystpcpy 857,28673
+yystpcpy 862,28811
+yytnamerr 884,29459
+yysyntax_error 932,30621
+  enum { YYERROR_VERBOSE_ARGS_MAXIMUM 937,30818
+# define YYCASE_(1008,34007
+# undef YYCASE_1018,34558
+yydestruct 1064,35682
+int yychar;1080,35990
+YYSTYPE yylval;1083,36054
+int yynerrs;1085,36109
+yyparse 1093,36171
+#define YYPOPSTACK(1133,37181
+#  undef YYSTACK_RELOCATE1206,39499
+    break;1335,42656
+    break;1341,42819
+    break;1347,42974
+    break;1364,43255
+    break;1386,43789
+    break;1402,44112
+    break;1418,44435
+    break;1427,44612
+    break;1446,45130
+    break;1465,45542
+    break;1475,45738
+    break;1481,45883
+    break;1487,46026
+    break;1493,46171
+    break;1517,46764
+    break;1533,47022
+    break;1548,47387
+    break;1563,47752
+    break;1578,48139
+    break;1593,48517
+    break;1609,48916
+    break;1628,49499
+    break;1644,49871
+    break;1659,50215
+    break;1670,50424
+    break;1686,50880
+    break;1698,51139
+    break;1715,51513
+    break;1721,51707
+    break;1727,51892
+    break;1733,52064
+    break;1739,52238
+    break;1745,52420
+    break;1751,52602
+    break;1757,52774
+    break;1763,52950
+      default: break;1767,53007
+  yylen 1783,53905
+  *++yyvsp yyvsp1786,53951
+  yyn 1792,54138
+  yystate 1794,54158
+    yystate 1798,54315
+  goto yynewstate;1800,54358
+  yytoken 1809,54643
+# define YYSYNTAX_ERROR 1818,54885
+# undef YYSYNTAX_ERROR1847,55832
+  goto yyerrlab1;1874,56388
+  yylen 1891,56893
+  yystate 1893,56938
+  goto yyerrlab1;1894,56958
+  yyerrstatus 1901,57184
+      yyn 1905,57274
+      yystate 1925,57796
+  *++yyvsp yyvsp1930,57901
+  yystate 1937,58052
+  goto yynewstate;1938,58069
+  yyresult 1945,58226
+  goto yyreturn;1946,58242
+  yyresult 1952,58389
+  goto yyreturn;1953,58405
+  yyresult 1961,58678
+
+src/parse.y,374
+    int rule;22,
+    int def_sdt_type;23,
+    Hist *hist;hist24,
+    String historytable 25,
+    siginfo_t *siginfo;siginfo27,
+  KeyVal *keyvalptr;keyvalptr33,
+  Val *val;val34,
+  char *chars;chars35,
+  int inttype;36,
+  long double ldouble;37,
+  case 1366,
+  case 1495,
+void yyerror 416,
+void cmdinit(423,
+void catch(427,
+void init(433,
+int main(446,

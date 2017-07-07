@@ -1,0 +1,17 @@
+# etags
+./**/GRTAGS
+./**/GPATH
+./**/GSYMS
+./**/GTAGS
+./**/TAGS
+# database
+./**/*.db
+# compiler
+./**/*.out
+# core dump {kernel, valgrind}
+./**/core*
+./**/vgcore*
+# bison
+./**/*.p.*
+# lex
+./**/*.l.*
