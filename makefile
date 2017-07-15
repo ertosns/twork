@@ -9,7 +9,7 @@ gdb: bison flex twdbg
 
 bison:
 	bison -d src/parse.y
-flex: 
+flex:
 	flex src/lex.l
 
 tw: $(hdr) $(src)

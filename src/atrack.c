@@ -16,7 +16,7 @@ int old_x_root, old_y_root;
 void initatrack() {
     cursession = malloc(sizeof(session));
     cursession->date = NULL;
-    //get current window, x_root, y_root
+    //get current window, x_root, y_rootP
 }
 
 String getwindow_name (Display *disp, Window win) {
@@ -112,6 +112,7 @@ int track() {
     Window window;
     int distance;
     if (!pid) {
+        read_cur_task();
         for(;;) {
             if (!CUR_TASK)
                 continue;

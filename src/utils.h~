@@ -20,6 +20,7 @@
 int i, def_sdt_type, rule;
 typedef char *String;
 typedef long  Date[2];
+String CUR_TASK;
 enum {crt=1, ins=2, upt=3};
 enum debug {NONE = 1, VERBOSE=2};
 enum success {SUCCESS = 1, FAILED = 0};
@@ -58,19 +59,19 @@ typedef struct
 
 typedef struct Row
 {
-  struct Row *nxt;
-  String *val;
+        struct Row *nxt;
+        String *val;
 } Row;
 
 typedef struct Table
 {
-  Row *row; // start
-  Row *current; // current reading|writing
-  int size;
-  int ncol;
-  // ncol width
-  int *coltype;
-  String *colname;
+    Row *row; // start
+        Row *current; // current reading|writing
+    int size;
+        int ncol;
+        // ncol width
+        int *coltype;
+        String *colname;
 } Table;
 
 typedef struct Result
@@ -100,3 +101,7 @@ int isfiler(String);
 int isfilew(String);
 int isfilerw(String);
 int assertcmd(int *status);
+
+void nullify_cur_task();
+void set_cur_task(String task);
+void read_cur_task();

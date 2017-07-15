@@ -93,8 +93,7 @@ int storecommits() {
       assert(strstr(line, "Entering") == line);
       strtok(line, "\'");
       tmpstr = strtok(NULL, "\'");
-      word = malloc(strlen(tmpstr));
-      strcpy(word, tmpstr);
+      word = strdup(tmpstr);
       nline++;
       break;
     }
@@ -105,10 +104,8 @@ int storecommits() {
       }
       strtok(line, " ");
       hash = strtok(NULL, " ");
-      hs->col = malloc(strlen(word));
-      hs->hash = malloc(strlen(hash));
-      strcpy(hs->hash, hash);
-      strcpy(hs->col, word);
+      hs->col = strdup(word);
+      hs->hash = strdup(hash); 
       if(fgets(line, MAX_LINE_CHARS, commits)) {
         hs->nxt = malloc(sizeof(struct HASH));
         hs = hs->nxt;
@@ -162,7 +159,7 @@ int storecommits() {
     // also free vals
     hs = hs->nxt;
   }
-
+  
   pclose(commits);
   //TODO (res) does inner pointer need to be freed(general)? ->hashes
   return SUCCESS;

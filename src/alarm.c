@@ -31,7 +31,6 @@ int initalarm() {
     if (!(ent = readdir(dir)))
         ALERT_DIR = NULL;
     else ALERT_DIR=dirname;
-
     return SUCCESS;
 }
 

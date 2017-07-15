@@ -65,9 +65,15 @@ int eventst(String ctable, String dval);
 /* validate, push end state, calls accumulate*/
 State *pushst(String ctable);
 /* view last state */
-State *state(String ctable);
+State* last_state(String);
+State* state(String ctable);
 /* validate, remove last state iff {start, stop},
    expand and add new state to history*/
+int ssf_start(String);
+int ssf_stop(String);
+String* list_ssf_tasks();
+String* list_current_ssf_tasks();
+
 int undost(String ctable, Hist *history);
 /* redo and prune state histoy */
 int redost(String ctable, Hist *history);

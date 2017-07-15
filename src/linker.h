@@ -11,7 +11,7 @@ String LINKABLES;
 String DAILY_TERMINATED;
 String NAME_COL;
 String TYPE_COL;
-
+String CUR_TASK;
 String* listlinkables(int *size);
 /* list of linkable tables */
 int addlinkable(String tablename);
@@ -25,3 +25,4 @@ int removelinkedrecords(String tablename);
    fetch linkable values, from linkable tables,
    insert to DAY-TERMINATED DT table */
 int link_accumulatables();
+String read_cur_task();

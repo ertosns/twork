@@ -1,6 +1,14 @@
 #!/bin/sh
 # TODO put process in background by SIGINT, and bg upon launch
 
+#where do you need your profile?
+PROF=${HOME}/twork
+#where you alarm media resides?
+ALERT=${HOME}/twork/media
+#where you database backup resides?
+BACKUP=${HOME}/twork/backup
+DEVELOP=${HOME}/prj
+
 env () {
     echo $1=$2 >> /etc/bash.bashrc
     echo "export $1=$2" >> /etc/bash.bashrc

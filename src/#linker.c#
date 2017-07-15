@@ -89,7 +89,7 @@ int addlinkable(String tablename) {
 		     makeval(PUSH_ROW, sdt_number) } ;
     sqlCreate(DAILY_TERMINATED, dtcols, 2);
     des_val((Val**)&lcols[0], 1);
-    des_val((Val**)&dtcols[0], 1);
+    des_val((Val**)&dtcols[0], 2);//<--------------------------------------------
   }
   else if(linkablexists(tablename)) {
     error("givin table already exists in LINKABLES table");
