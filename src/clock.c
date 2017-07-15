@@ -300,7 +300,7 @@ String* list_current_ssf_tasks() {
     for (int i = 0; i < cnt; i++) {
       if (!tasks[i]) {
 	for (int j = i+1; j < cnt && tasks[j]; j++) {
-	  strcpy(tasks[i], tasks[j]);
+	  tasks[i] =  strdup(tasks[j]);
 	  free(tasks[j]);
 	  tasks[j] = NULL;
 	}
@@ -309,6 +309,19 @@ String* list_current_ssf_tasks() {
     return tasks;
 }
 
+
+int is_ssf(String name) {
+  String *ssfs = list_ssf_tasks();
+  if(!ssfs)
+    return FAILED;
+  
+  for (int i = 0; ssfs[i]; i++) {
+    if (!strcmp(ssfs[i], name))
+      return SUCCESS;
+  }
+  return FAILED;
+}
+    
 extern Hist *hist;
 int undost(String ctable, Hist *history) {
   if(!validstate(ctable, undo)) {

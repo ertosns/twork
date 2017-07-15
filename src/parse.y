@@ -167,8 +167,9 @@ start: NAME START
 {
   //TODO prevent multitasking, also with event
   //change viewing {5,6,0} -> {start, stop, event}
-  if ( read_cur_task() )
-    error(cat(3, "failed! task ", $1, " opened"));
+  String opened;
+  if ( (opened = read_cur_task()) )
+    error(cat(3, "failed! other task ", opened, " running"));
   else {
     if (!startst($1))
       error("start failed");

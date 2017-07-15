@@ -166,7 +166,8 @@ Val *makevalptr(String strep, int valtype)
 
 //debug
 Val makeval(String strep, int valtype) {
-  return *makevalptr(strep, valtype);
+  Val *ptr = makevalptr(strep, valtype);
+  return *ptr;
 }
 
 void exec(int command, KeyVal *keyval, String tname, String clause)
@@ -324,7 +325,7 @@ Result *sqlReadGrouped(String name, Val cols[], int size, int groupby, int group
 
 Result *readTables()
 {
-  String sql = "SELECT name FROM my_db.sqlite_master WHERE type = 'table';";
+  String sql = cat(1, "SELECT name FROM my_db.sqlite_master WHERE type = 'table';");
   db(cat(2, "SQL: ", sql));
   des_tbl(table);
   int rc = sqlite3_exec(database, sql, readTable, NULL, 0);
@@ -472,7 +473,7 @@ Result *sqlprologue(int rc, String sql) {
     res->type=tableres;
     res->table = copyTable();
   }
-  des_ptr((void**)&sql, 0); 
+  des_ptr(&sql, 1); 
   return res;
 }
 
@@ -616,18 +617,15 @@ String colval(Result *res, String colname, int irow) {
     return row->val[c];
 }
 
-void des_val(Val **vals, int size) {
-  for (int i = 0; i < size; i++) {
-    if (vals[i]) {
-      if (vals[i]->strep)
-	free(vals[i]->strep);
-      free(vals+i);
-    }
-  }
+void des_val(Val *vals) {
+  //TODO fix this
+  if (vals);
+    // free(vals);
 }
 
 void des_err(Err *err) {
-  if (!err)
+  //TODO fix
+  /*  if (!err)
     return;
 
   if(err->command)
@@ -635,17 +633,17 @@ void des_err(Err *err) {
   if(err->err)
     free(err->err);
 
-  free(err);
+    free(err);*/
 }
 
-void des_row(Row *row, int size) {
+void des_row(Row *row, int size, int ncol) {
   if (size == 0)
     return;
 
   if (row->nxt)
-    des_row(row->nxt, --size);
+    des_row(row->nxt, --size, ncol);
   
-  des_ptr((void **)row->val, 0);
+  des_ptr(row->val, ncol);
   free(row);
 }
 
@@ -653,7 +651,7 @@ void des_tbl(Table *tbl) {
   if (!tbl)
     return;
 
-  des_row(tbl->row, tbl->size);
+  des_row(tbl->row, tbl->size, tbl->ncol);
   if(tbl->coltype)
     free(tbl->coltype);
   if(tbl->colname)
@@ -672,17 +670,14 @@ void des_res(Result *res) {
   free(res);
 }
 
-void des_ptr(void **ptr, int size) {
+void des_ptr(String *ptr, int size) {
   if (!ptr)
     return;
   
   if (size > 0)
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++) {
       if (ptr[i])
-	free(ptr+i);
-    
-  else
-    for (int i = 0; ptr[i]; i++)
-      if (ptr[i])
-	free(ptr+i);
+	free(ptr[i]);
+    }
+ 
 }

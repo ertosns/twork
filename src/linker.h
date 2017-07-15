@@ -12,6 +12,8 @@ String DAILY_TERMINATED;
 String NAME_COL;
 String TYPE_COL;
 String CUR_TASK;
+
+void initlinker();
 String* listlinkables(int *size);
 /* list of linkable tables */
 int addlinkable(String tablename);

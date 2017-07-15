@@ -13,7 +13,6 @@ String CUR_TASK;
 //TODO loc fix
 //compare & check strange bug
 void initlinker() { 
-  CUR_TASK = malloc(50*sizeof(char));
   read_cur_task(); 
 }
 
@@ -39,7 +38,7 @@ String* listlinkables(int *size) {
 
  des:
   des_res(res);
-  des_val(&cols[0], 1);
+  des_val(&cols[0]);
   return linkable;
 }
 
@@ -51,7 +50,7 @@ int linkablexists(String name) {
     if (!strcmp(linkables[i], name))
       exists = 1;
   
-  des_ptr(linkables, 0);
+  des_ptr(linkables, size);
   return exists;
 }
 
@@ -88,8 +87,8 @@ int addlinkable(String tablename) {
     Val dtcols[] = { makeval(NAME_COL, sdt_type),
 		     makeval(PUSH_ROW, sdt_number) } ;
     sqlCreate(DAILY_TERMINATED, dtcols, 2);
-    des_val((Val**)&lcols[0], 1);
-    des_val((Val**)&dtcols[0], 1);
+    des_val(&lcols[0]);
+    des_val(&lcols[1]);
   }
   else if(linkablexists(tablename)) {
     error("givin table already exists in LINKABLES table");
@@ -99,7 +98,7 @@ int addlinkable(String tablename) {
   String names[] = {LINKABLES, NAME_COL};
   Val val[] = { makeval(tablename, sdt_type) };
   int rc = sqlInsert(names, val, 1);
-  des_val(&val[0], 1);
+  des_val(&val[0]);
   return rc;
 }
 
@@ -122,7 +121,7 @@ int isfresh(String name) {
  des:
   des_res(linkableres);
   des_res(dtres);
-  des_ptr((void**)targetTable, 1);
+  des_ptr(&targetTable, 1);
   return fresh;
 }
 
@@ -144,13 +143,13 @@ int link_accumulatables() {
 	Val vals[] = { makeval(linkables[i], sdt_type),
 		       makeval(itos(lastrowid(linkables[i])), sdt_number) };
 	suc = sqlInsert(cols, vals, 2);
-	des_val(&vals[0], 2);
+	des_val(&vals[0]);
     }
   }
   if (getenv(TWORK_DEVELOP) && !dbgmode)
     loc(NULL);
 
-  des_ptr((void**)linkables, 0);
+  des_ptr(linkables, size);
   return suc;
 }
   
@@ -159,13 +158,17 @@ String read_cur_task() {
   int size;
   String *linkables = listlinkables(&size);
   State *state;
-  CUR_TASK = NULL;
+  if(CUR_TASK)
+    free(CUR_TASK);
+  
   for (int i = 0; i < size; i++) {
     state = last_state(linkables[i]);
-    if (state && state->type == start) {
-      strncpy(CUR_TASK, linkables[i], 50);
-      break;
+    if (state && state->type == start && !is_ssf(linkables[i])) {
+      CUR_TASK = strdup(linkables[i]);
+      free(linkables[i]);
+      return CUR_TASK;
     }
+    free(linkables[i]);
   }
-  return CUR_TASK;
+  return NULL;
 }

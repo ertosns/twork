@@ -73,7 +73,7 @@ int ssf_start(String);
 int ssf_stop(String);
 String* list_ssf_tasks();
 String* list_current_ssf_tasks();
-
+int is_ssf(String);
 int undost(String ctable, Hist *history);
 /* redo and prune state histoy */
 int redost(String ctable, Hist *history);
