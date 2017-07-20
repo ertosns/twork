@@ -437,12 +437,14 @@ void init() {
 
 int main(int argc, char **argv)
 {
-    init();
-    cmdinit();
-    if(argc > 1)
-        if(!strcmp(argv[1],  "-d"))
-            dbgmode = 1;
-        else dbgmode = 0;
-
-    return yyparse();
+  if(argc > 1) {
+    if (!strcmp(argv[1],  "-d")) {
+      dbgmode = 1;
+      highlight("debug mood started!");
+    }
+    else dbgmode = 0;
+  }
+  init();
+  cmdinit();
+  return yyparse();
 }

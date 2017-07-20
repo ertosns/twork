@@ -8,7 +8,7 @@ String LINKABLES = "LINKABLES";
 String DAILY_TERMINATED = "DAILYTERM";
 String PUSH_ROW = "PUSH";
 String NAME_COL = "NAME";
-String CUR_TASK;
+String CUR_TASK = NULL;
 //TODO change word limit {colName}
 //TODO loc fix
 //compare & check strange bug
@@ -158,9 +158,11 @@ String read_cur_task() {
   int size;
   String *linkables = listlinkables(&size);
   State *state;
-  if(CUR_TASK)
+  if(CUR_TASK) {
     free(CUR_TASK);
-  
+    CUR_TASK = NULL;
+  }
+		     
   for (int i = 0; i < size; i++) {
     state = last_state(linkables[i]);
     if (state && state->type == start && !is_ssf(linkables[i])) {
