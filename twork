@@ -1,11 +1,9 @@
 #!/bin/sh
 # TODO put process in background by SIGINT, and bg upon launch
 
-#where do you need your profile?
 PROF=${HOME}/twork
-#where you alarm media resides?
+#where 444 permissioned music files exists
 ALERT=${HOME}/twork/media
-#where you database backup resides?
 BACKUP=${HOME}/twork/backup
 DEVELOP=${HOME}/prj
 
@@ -16,9 +14,9 @@ env () {
 }
 
 if [ -z ${TWORK_PROF} ]; then env TWORK_PROF $PROF; fi
-if [ -z ${TWORK_ALERT} ]; then env TWORK_ALERT $ALERT; fi
-if [ -z ${TWORK_BACKUP} ]; then env TWORK_BACKUP $BACKUP; fi
+if [ -z ${TWORK_ALERT} ]; then mkdir -p $ALERT; env TWORK_ALERT $ALERT; fi
+if [ -z ${TWORK_BACKUP} ]; then mkdir -p $BACKUP; env TWORK_BACKUP $BACKUP; fi
 if [ -z ${TWORK_DEVELOP} ]; then env TWORK_DEVELOP $DEVELOP; fi
 
-exec ${HOME}/twork/twork.out
+(exec ${HOME}/twork/twork.out)
 cp --backup=t ${HOME}/twork/twork.db ${TWORK_BACKUP}/

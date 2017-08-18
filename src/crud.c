@@ -63,6 +63,7 @@ void handleRes(Result *res)
     des_err(res->err);
 }
 
+
 void viewTable()
 {
   if (!table)

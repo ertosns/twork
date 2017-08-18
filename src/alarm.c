@@ -35,6 +35,7 @@ int initalarm() {
 }
 
 void localalert () {
+  //TODO use default if vlc isn't installed.
     String args[] = { PLAYER, "-ZL", ALERT_DIR, "/*", (char *)NULL};
     int link[2];
     pid_t pid;

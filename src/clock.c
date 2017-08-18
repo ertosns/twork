@@ -45,6 +45,7 @@ void createTclk(String ctable) {
     sqlCreate(ctable, stateval, 2);
 }
 
+
 int insertts(String ctable, String dval, int state) {
     Val vals[] = { makeval((dval)?dval:"0", sdt_double),
                    makeval(itos(state), sdt_number) };
@@ -181,6 +182,7 @@ State *accumulate (String table) {
   free(res);
   return restate;
 }
+
 
 int startst(String ctable) {
     if(notexist(ctable)) {
