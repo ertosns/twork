@@ -132,7 +132,7 @@ int storecommits() {
     oldhashres = sqlRead(LOC, oldhashvals, 1, 1, 1, oldhashclause);
     ohash = (oldhashres->table)?oldhashres->table->row->val[0]:NULL;
     //free(oldhashres);
-    yieldloc(hs->col, ohash, hs->hash, &loc);
+    yieldloc(hs->col, ohash, hs->hash, &loc[0]);
     Val vals[] = { makeval(hs->col, sdt_string),
                    makeval(hs->hash, sdt_string),
                    makeval(itos(loc[0]), sdt_number),
