@@ -97,13 +97,14 @@ int storecommits() {
       hash = strtok(NULL, " ");
       hs->col = strdup(word);
       hs->hash = strdup(hash); 
-      if(fgets(line, MAX_LINE_CHARS, commits)) {
-        hs->nxt = malloc(sizeof(struct HASH));
-        hs = hs->nxt;
+      /*if(fgets(line, MAX_LINE_CHARS, commits)) {
+        
         for(int c = 0; c < strlen(line); c++)
           ungetc((int)line[c], commits);
         ungetc('\n', commits);
-      }
+        }*/
+      hs->nxt = malloc(sizeof(struct HASH));
+      hs = hs->nxt;
       free(word);
       ncommits++;
     }
@@ -111,7 +112,7 @@ int storecommits() {
   
   if(ncommits==0) {
     pclose(commits);
-    return SUCCESS; //no commits|submodules yet;
+    return SUCCESS;
   }
 
   hs = shash;
@@ -122,7 +123,6 @@ int storecommits() {
   Val oldhashvals[] = { makeval(COMMIT, sdt_string) };
   String oldhashclause;
   String ohash;
-  /*TODO (fix) no need to keep commits, remove old commits except the last */
   for (int r = 0; r < (ncommits)*2; r++) {
     // get prev hash for the same submodule hs->col
     // calc diff betweeh hs->hash, prev line.
@@ -143,8 +143,8 @@ int storecommits() {
     // also free vals
     hs = hs->nxt;
   }
+  //free hs
   pclose(commits);
-  //TODO (res) does inner pointer need to be freed(general)? ->hashes
   return SUCCESS;
 }
 
