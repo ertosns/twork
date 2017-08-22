@@ -85,27 +85,14 @@ int storecommits() {
   FILE *commits = popen(GIT_LOG, "r");
   String word, hash, tmpstr = NULL;
   String line = malloc(MAX_LINE_CHARS);
-  int nline = 1;
-  while ((line = fgets(line, MAX_LINE_CHARS, commits))) {
-    /*TODO (fix) no need to keep commits, remove old commits except the last */
-    error(line);
-    switch (nline%6) {
-    case 1: { //Entering 'submodulename'
-      if(strstr(line, "Entering") != line){
-        error(cat(2, "instead of enterring submodule directory, following line received: ", line));
-        goto end;
-      }
+  int ncommits = 0;
+  while (line = fgets(line, MAX_LINE_CHARS, commits)) {
+    if(strstr(line, "Entering") == line){
       strtok(line, "\'");
       tmpstr = strtok(NULL, "\'");
       word = strdup(tmpstr);
-      nline++;
-      break;
     }
-    case 2: {
-      if(strstr(line, "Entering") == line) {
-        nline=6; // undo case1 counting, read following line in default case.
-        continue; //no commits yet
-      }
+    else if (strstr(line, "commit")) {
       strtok(line, " ");
       hash = strtok(NULL, " ");
       hs->col = strdup(word);
@@ -118,23 +105,15 @@ int storecommits() {
         ungetc('\n', commits);
       }
       free(word);
-      nline++;
-      break;
-    }
-    default:
-      if(strstr(line, "Entering") == line)
-        continue;
-      nline++;
-      break;
+      ncommits++;
     }
   }
-
-  if(--nline==0) {
+  
+  if(ncommits==0) {
     pclose(commits);
     return SUCCESS; //no commits|submodules yet;
   }
 
-  int ncommits = nline/6;
   hs = shash;
   int loc[2];
   Result *ilocres;
@@ -143,6 +122,7 @@ int storecommits() {
   Val oldhashvals[] = { makeval(COMMIT, sdt_string) };
   String oldhashclause;
   String ohash;
+  /*TODO (fix) no need to keep commits, remove old commits except the last */
   for (int r = 0; r < (ncommits)*2; r++) {
     // get prev hash for the same submodule hs->col
     // calc diff betweeh hs->hash, prev line.
@@ -163,8 +143,6 @@ int storecommits() {
     // also free vals
     hs = hs->nxt;
   }
-
- end:
   pclose(commits);
   //TODO (res) does inner pointer need to be freed(general)? ->hashes
   return SUCCESS;
