@@ -53,7 +53,7 @@ struct HASH *shash = &hashes;
 //TODO (fix) replace strings with global variables for better styleing
 //TODO handle NULL ohash
 void yieldloc (String colname, String ohash, String nhash, int *locyield) {
-  FILE *diff = popen(cat(5, GIT_DIFF, ohash?ohash:"", " ", nhash, "2>/dev/null"), "r");
+  FILE *diff = popen(cat(5, GIT_DIFF, ohash?ohash:"", " ", nhash, " 2>/dev/null "), "r");
   String yield, line;
   line = malloc(MAX_LINE_CHARS);
   line = fgets(line, MAX_LINE_CHARS, diff);
