@@ -102,7 +102,7 @@ int storecommits() {
     }
     case 2: {
       if(strstr(line, "Entering") == line) {
-        nline--; // undo case1 counting
+        nline=6; // undo case1 counting, read following line in default case.
         continue; //no commits yet
       }
       strtok(line, " ");
