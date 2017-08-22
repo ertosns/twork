@@ -56,10 +56,11 @@ void yieldloc (String colname, String ohash, String nhash, int *locyield) {
   FILE *diff = popen(cat(5, GIT_DIFF, ohash?ohash:"", " ", nhash, " 2>/dev/null "), "r");
   String yield, line;
   line = malloc(MAX_LINE_CHARS);
-  line = fgets(line, MAX_LINE_CHARS, diff);
   int pos = 0;
   int neg = 0;
   while((line = fgets(line, MAX_LINE_CHARS, diff))) {
+    if (strstr(line, "Entering") == line)
+      continue;
     yield = strtok(line, "\t");
     pos += atoi(yield);
     yield = strtok(line, "\t");
