@@ -52,8 +52,8 @@ struct HASH *shash = &hashes;
 
 //TODO (fix) replace strings with global variables for better styleing
 //TODO handle NULL ohash
-void yieldloc (String colname, String ohash, String nhash, int locyield[]) {
-  FILE *diff = popen(cat(4, GIT_DIFF, ohash?ohash:"", " ", nhash), "r");
+void yieldloc (String colname, String ohash, String nhash, int *locyield) {
+  FILE *diff = popen(cat(5, GIT_DIFF, ohash?ohash:"", " ", nhash, "2>/dev/null"), "r");
   String yield, line;
   line = malloc(MAX_LINE_CHARS);
   line = fgets(line, MAX_LINE_CHARS, diff);
@@ -132,7 +132,7 @@ int storecommits() {
     oldhashres = sqlRead(LOC, oldhashvals, 1, 1, 1, oldhashclause);
     ohash = (oldhashres->table)?oldhashres->table->row->val[0]:NULL;
     //free(oldhashres);
-    yieldloc(hs->col, ohash, hs->hash, loc);
+    yieldloc(hs->col, ohash, hs->hash, &loc);
     Val vals[] = { makeval(hs->col, sdt_string),
                    makeval(hs->hash, sdt_string),
                    makeval(itos(loc[0]), sdt_number),
