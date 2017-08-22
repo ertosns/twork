@@ -34,12 +34,12 @@ String GIT_PUSH;
 
 //TODO (res) how call function once upon use? after loading hdrs
 void initloc() {
-    DEV_PATH = getenv(TWORK_DEVELOP);
-    GIT_LOG = cat(5,"cd ", DEV_PATH, ";git submodule foreach git log --author ",AUTHOR, " -n 1");
-    GIT_DIFF = cat(3, "cd ", DEV_PATH, ";git submodule foreach git diff --numstat ");
-    GIT_ADD = cat(3, "cd ", DEV_PATH, ";git submodule foreach git add --all");
-    GIT_COMMIT = cat(5, "cd ", DEV_PATH, ";git submodule foreach git commit -m\"",DEFAULT_MSG, "\"");
-    GIT_PUSH = cat(3, "cd ", DEV_PATH, ";git submodule foreach git push");
+  DEV_PATH = getenv(TWORK_DEVELOP);
+  GIT_LOG = cat(5,"cd ", DEV_PATH, ";git submodule foreach git log --author ",AUTHOR, " -n 1");
+  GIT_DIFF = cat(3, "cd ", DEV_PATH, ";git submodule foreach git diff --numstat ");
+  GIT_ADD = cat(3, "cd ", DEV_PATH, ";git submodule foreach git add --all");
+  GIT_COMMIT = cat(5, "cd ", DEV_PATH, ";git submodule foreach git commit -m\"",DEFAULT_MSG, "\"");
+  GIT_PUSH = cat(3, "cd ", DEV_PATH, ";git submodule foreach git push");
 }
 
 //TODO (fix) unify all linked lists used allover!
