@@ -88,6 +88,7 @@ int storecommits() {
   int nline = 1;
   while ((line = fgets(line, MAX_LINE_CHARS, commits))) {
     /*TODO (fix) no need to keep commits, remove old commits except the last */
+    error(line);
     switch (nline%6) {
     case 1: { //Entering 'submodulename'
       if(strstr(line, "Entering") != line){
