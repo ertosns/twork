@@ -65,8 +65,8 @@ void yieldloc (String colname, String ohash, String nhash, int *locyield) {
     yield = strtok(line, "\t");
     neg += atoi(yield);
   }
-  locyield[0] = pos;
-  locyield[1] = neg;
+  *locyield[0] = pos;
+  *locyield[1] = neg;
 }
 
 //TODO (fix) dailyterminated instead of expanding columns, expand rows, and read per column/row value instead of column value.
