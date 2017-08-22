@@ -90,7 +90,7 @@ int storecommits() {
     /*TODO (fix) no need to keep commits, remove old commits except the last */
     switch (nline%6) {
     case 1: { //Entering 'submodulename'
-      assert(strstr(line, "Entering") == line);
+      assert(strstr(line, "Entering") != line);
       strtok(line, "\'");
       tmpstr = strtok(NULL, "\'");
       word = strdup(tmpstr);
@@ -184,7 +184,7 @@ int loc(String commitmsg) {
     if(!status) {
       //nothing to commmit
       error(cat(2, WRONG_GIT_COMMIT, DEV_PATH));
-      //return FAILED;
+      return FAILED;
     }
     status = system(GIT_PUSH);
     assertcmd(&status);
