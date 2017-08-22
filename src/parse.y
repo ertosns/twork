@@ -390,7 +390,7 @@ removelastline: NAME REMOVE_LAST_RECORD
 }
 ;
 
-droptable: NAME NAME DROP_TABLE
+droptable: NAME DROP_TABLE
 {
   deleteTable($1);
   cmdinit();

@@ -146,8 +146,8 @@ int link_accumulatables() {
 	des_val(&vals[0]);
     }
   }
-  if (getenv(TWORK_DEVELOP) && !dbgmode)
-    loc(NULL);
+  //if (getenv(TWORK_DEVELOP) && !dbgmode)
+  loc(NULL);
 
   des_ptr(linkables, size);
   return suc;
