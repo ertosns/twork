@@ -183,8 +183,8 @@ int loc(String commitmsg) {
     assertcmd(&status);
     if(!status) {
       //nothing to commmit
-      error(cat(2, WRONG_GIT_COMMIT, DEV_PATH));
-      return FAILED;
+      //error(cat(2, WRONG_GIT_COMMIT, DEV_PATH));
+      //return FAILED;
     }
     status = system(GIT_PUSH);
     assertcmd(&status);
