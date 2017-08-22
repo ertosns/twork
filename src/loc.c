@@ -116,7 +116,7 @@ int storecommits() {
   }
 
   hs = shash;
-  int loc[2];
+  int loc[2] = {0,0};
   Result *ilocres;
   Result *oldhashres;
   String oldhashnames[] = {LOC, COMMIT};
