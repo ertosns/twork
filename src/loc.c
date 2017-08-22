@@ -90,7 +90,7 @@ int storecommits() {
     /*TODO (fix) no need to keep commits, remove old commits except the last */
     switch (nline%6) {
     case 1: { //Entering 'submodulename'
-      assert(strstr(line, "Entering") != line);
+      assert(strstr(line, "Entering") == line);
       strtok(line, "\'");
       tmpstr = strtok(NULL, "\'");
       word = strdup(tmpstr);
