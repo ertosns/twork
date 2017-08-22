@@ -90,7 +90,10 @@ int storecommits() {
     /*TODO (fix) no need to keep commits, remove old commits except the last */
     switch (nline%6) {
     case 1: { //Entering 'submodulename'
-      assert(strstr(line, "Entering") == line);
+      if(strstr(line, "Entering") != line){
+        error(cat(2, "instead of enterring submodule directory, following line received: ", line));
+        goto end;
+      }
       strtok(line, "\'");
       tmpstr = strtok(NULL, "\'");
       word = strdup(tmpstr);
@@ -159,7 +162,8 @@ int storecommits() {
     // also free vals
     hs = hs->nxt;
   }
-  
+
+ end:
   pclose(commits);
   //TODO (res) does inner pointer need to be freed(general)? ->hashes
   return SUCCESS;
