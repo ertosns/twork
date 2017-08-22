@@ -123,7 +123,7 @@ int storecommits() {
   Val oldhashvals[] = { makeval(COMMIT, sdt_string) };
   String oldhashclause;
   String ohash;
-  for (int r = 0; r < (ncommits)*2; r++) {
+  for (int r = 0; r < ncommits; r++) {
     // get prev hash for the same submodule hs->col
     // calc diff betweeh hs->hash, prev line.
     //get old hash
@@ -137,7 +137,7 @@ int storecommits() {
                    makeval(hs->hash, sdt_string),
                    makeval(itos(loc[0]), sdt_number),
                    makeval(itos(loc[1]), sdt_number) };
-    sqlInsert(colnames, vals, ncommits);
+    sqlInsert(colnames, vals, 4);
     //TODO why it fails?
     //free(ilocres);
     // also free vals
