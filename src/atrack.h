@@ -27,7 +27,6 @@ const String MOUSING_FREQ;
 // database window table
 const String WINDOW;
 const String WINDOW_NAME;
-String CUR_TASK;
 /* initialize variables */
 void initatrack();
 /* infinite background tracking looping process,

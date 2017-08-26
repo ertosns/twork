@@ -174,7 +174,7 @@ start: NAME START
     if (!startst($1))
       error("start failed");
     else {
-      CUR_TASK = $1;
+      CUR_TASK = strdup($1);
       if (!hist) {
 	free(hist);
 	hist = NULL;
@@ -262,7 +262,7 @@ gettask: GET_CURRENT_TASK
 {
     if (!CUR_TASK)
         read_cur_task();
-    CUR_TASK = (!CUR_TASK)?"":CUR_TASK;
+    
     printf("current task: %s\n", CUR_TASK);
     cmdinit();
 }
@@ -376,9 +376,10 @@ viewlastrecords: NAME INTEGER VIEW_LAST_RECORDS
 {
   String clause = cat(5, "ROWID > ((SELECT MAX(ROWID) FROM ", $1, ") - ", itos($2), ")");
   Result *res = sqlRead($1, NULL, 0, 0, 0, clause);
-  if (res->type == tableres)
+  if (res->type == tableres) {
     viewTable();
-  free(res);
+    free(res);
+  }
   cmdinit();
 }
 ;
@@ -392,7 +393,7 @@ removelastline: NAME REMOVE_LAST_RECORD
 
 droptable: NAME DROP_TABLE
 {
-  deleteTable($1);
+  removelinkable($1);
   cmdinit();
 }
 ;
@@ -422,7 +423,7 @@ void init() {
   initcrud();
   initalarm();
   initloc();
-  initatrack();
+  //initatrack(); //use zeitgeist instead
   String *tasks = list_current_ssf_tasks();
   int cnt = 0;
   if (tasks) {

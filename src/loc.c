@@ -130,7 +130,8 @@ int storecommits() {
     //get old hash
     //TODO (fix) create map between type, colname i.e commit, sdt_string cleaner, support future layers
     oldhashclause = cat(4, prependType(SUBMODULE, sdt_string), " = '", hs->col, "'");
-    oldhashres = sqlRead(LOC, oldhashvals, 1, 1, 1, oldhashclause);
+    oldhashres = sqlRead(LOC, oldhashvals, 1, 1, 1,
+                         oldhashclause);
     ohash = (oldhashres->table)?oldhashres->table->row->val[0]:NULL;
     //free(oldhashres);
     yieldloc(hs->col, ohash, hs->hash, &loc[0]);

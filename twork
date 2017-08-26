@@ -19,4 +19,4 @@ if [ -z ${TWORK_BACKUP} ]; then mkdir -p $BACKUP; env TWORK_BACKUP $BACKUP; fi
 if [ -z ${TWORK_DEVELOP} ]; then env TWORK_DEVELOP $DEVELOP; fi
 
 (exec ${HOME}/twork/twork.out)
-cp --backup=t ${HOME}/twork/twork.db ${TWORK_BACKUP}/
+cp --backup=t ${HOME}/twork/twork.db ${TWORK_BACKUP}

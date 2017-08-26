@@ -13,7 +13,7 @@ flex:
 	flex src/lex.l
 
 tw: $(hdr) $(src)
-	gcc -std=gnu11 -o twork.out $(src) -lsqlite3 -lm -lX11
+	gcc -std=gnu11 -g3 -o twork.out $(src) -lsqlite3 -lm -lX11
 	exec ./init.sh
 
 twdbg: $(hdr) $(src)

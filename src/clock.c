@@ -197,6 +197,7 @@ int startst(String ctable) {
     return FAILED;
 }
 
+
 int stopst(String ctable) {
   if(notexist(ctable)) {
     error(cat(2, "can't push stop state, table doesn't exists with name: ", ctable));
@@ -226,7 +227,6 @@ State *zerostate() {
   return state;
 }
 
-//depricated
 State *state(String ctable) {
   Result *res = sqlRead(ctable, 0, 0, 1, 1, 0);
   handleRes(res);

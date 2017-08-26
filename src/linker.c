@@ -127,10 +127,10 @@ int isfresh(String name) {
 
 int removelinkable(String table) {
   int success = 0;
-  success += deleteTable(table);
-  success += deleteRecords(LINKABLES, cat(4, NAME_COL, " = '", table, "' "));
-  success += deleteRecords(DAILY_TERMINATED, cat(4, NAME_COL, " = '", table, "' "));
-  return success == 3;
+  deleteTable(table);
+  deleteRecords(LINKABLES, cat(4, prependType(NAME_COL, sdt_type), " = '", table, "' "));
+  deleteRecords(DAILY_TERMINATED, cat(4, prependType(NAME_COL, sdt_type), " = '", table, "' "));
+  return 1;
 }
 
 
@@ -146,23 +146,24 @@ int link_accumulatables() {
 	des_val(&vals[0]);
     }
   }
-  //if (getenv(TWORK_DEVELOP) && !dbgmode)
-  loc(NULL);
+  if (!dbgmode)
+    loc(NULL);
 
   des_ptr(linkables, size);
   return suc;
 }
-  
+
 
 String read_cur_task() {
   int size;
   String *linkables = listlinkables(&size);
   State *state;
+  
   if(CUR_TASK) {
     free(CUR_TASK);
     CUR_TASK = NULL;
   }
-		     
+  
   for (int i = 0; i < size; i++) {
     state = last_state(linkables[i]);
     if (state && state->type == start && !is_ssf(linkables[i])) {

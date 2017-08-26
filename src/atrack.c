@@ -13,9 +13,20 @@
 #include <math.h>
 
 int old_x_root, old_y_root;
+
+const String SESSIONS = "SESSIONS";
+//! note that end date is the default date column
+const String START_DATE = "START_DATE";
+const String LINKABLE_TASK = "LINKABLE_TASK";
+const String KEYING_FREQ = "K_FREQ";
+const String MOUSING_FREQ = "M_FREQ";
+const String WINDOW = "WINDOW";
+const String WINDOW_NAME = "WINDOW_NAME";
+
 void initatrack() {
     cursession = malloc(sizeof(session));
     cursession->date = NULL;
+    track();
     //get current window, x_root, y_rootP
 }
 
@@ -99,54 +110,54 @@ void incmousing(int distance) {
     cursession->mousing+=distance;
 }
 
+// other application block events!
 int track() {
-    pid_t pid = fork();
-    String task, window_name;
-    XEvent *xevent;
-    XMotionEvent *xmotion;
-    long mask = KeyPressMask|
-        ButtonPressMask|
-        EnterWindowMask|
-        PointerMotionMask;
-    Display *display = XOpenDisplay(NULL);
-    Window window;
-    int distance;
-    if (!pid) {
-        read_cur_task();
-        for(;;) {
-            if (!CUR_TASK)
-                continue;
-            else task = CUR_TASK;
-
-            XMaskEvent(display, mask, xevent);
-            switch(xevent->type) {
-            case EnterNotify: {
-                window = ((XEnterWindowEvent*)xevent)->window;
-                window_name = getwindow_name(display, window);
-                if(!window_name) {
-                    error("nameless window caught!");
-                    continue;
-                }
-                set_window(window_name, task);
-                break;
-            }
-            case MotionNotify: {
-                xmotion = (XMotionEvent*)xevent;
-                distance = (int) sqrt(pow(abs(old_x_root - xmotion->x_root), 2) +
-                                pow(abs(old_y_root - xmotion->y_root), 2));
-                incmousing(distance);
-                break;
-            }
-            case KeyPress:
-            case ButtonPress: {
-                inckeying();
-                break;
-            }
-            default: {
-                error("undefined event mask!");
-            }
-            }
+  pid_t pid = fork();
+  String task, window_name;
+  XEvent *xevent = malloc(sizeof(XEvent));
+  XMotionEvent *xmotion;
+  long mask = KeyPressMask|
+    ButtonPressMask|
+    EnterWindowMask|
+    PointerMotionMask;
+  Display *display = XOpenDisplay(NULL);
+  Window window;
+  int distance;
+  if (!pid) {
+    read_cur_task();
+    for(;;) {
+      //if (!CUR_TASK)
+      //  continue;
+      //else task = CUR_TASK;
+      XMaskEvent(display, mask, xevent);
+      switch(xevent->type) {
+      case EnterNotify: {
+        window = ((XEnterWindowEvent*)xevent)->window;
+        window_name = getwindow_name(display, window);
+        if(!window_name) {
+          error("nameless window caught!");
+          continue;
         }
+        set_window(window_name, task);
+        break;
+      }
+      case MotionNotify: {
+        xmotion = (XMotionEvent*)xevent;
+        distance = (int) sqrt(pow(abs(old_x_root - xmotion->x_root), 2) +
+                              pow(abs(old_y_root - xmotion->y_root), 2));
+        incmousing(distance);
+        break;
+      }
+      case KeyPress:
+      case ButtonPress: {
+        inckeying();
+        break;
+      }
+      default: {
+        error("undefined event mask!");
+      }
+      }
     }
-    return pid != -1;
+  }
+  return pid != -1;
 }

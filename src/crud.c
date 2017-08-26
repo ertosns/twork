@@ -469,7 +469,7 @@ Result *sqlprologue(int rc, String sql) {
   if(err->status == FAILED) {
     res->type=errorres;
     res->err = err;
-    handleRes(res);
+    //handleRes(res);
   } else {
     res->type=tableres;
     res->table = copyTable();
@@ -493,8 +493,8 @@ int deleteTable(String name)
 }
 
 int deleteRecords(String name, String clause) {
-  String sql = cat(5, "delete from ", name, " where ", clause, ";");
   initDB();
+  String sql = cat(5, "delete from ", name, " where ", clause, ";");
   int rc = sqlite3_exec(database, sql, 0, 0, 0);
   if (rc != SQLITE_OK) {
     error(cat (2, "can't del records\nErr: ", sqlite3_errmsg(database)));
