@@ -73,4 +73,7 @@ extern void cmdinit();
   return DOUBLE;
 }
 
+. {
+  printf("ambigious command!\nwrite twork -help\n");
+}
 %%

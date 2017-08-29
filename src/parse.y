@@ -75,10 +75,12 @@ command: command command
 help: HELP
 {
   /*
+
   String hlp = " twork based on accumulatable tables with name TABLE, \
 and actions {start, stop, event}. \
+
    tasks uses {start, stop, value(event)}, only one tasks could be active at a time.\
-     TABLE -st|-start
+     TABLE -st|-start|start
        push start action if given name exists, or create new accumulatable with 
        given name, and push start action. 
      TABLE -sp|-stop
@@ -260,11 +262,8 @@ listopenssf: LIST_OPEN_TASKS
 
 gettask: GET_CURRENT_TASK
 {
-    if (!CUR_TASK)
-        read_cur_task();
-    
-    printf("current task: %s\n", CUR_TASK);
-    cmdinit();
+  printf("current task: %s\n", read_cur_task());
+  cmdinit();
 }
 ;
 
@@ -298,6 +297,11 @@ undo: NAME UNDO
       hist = calloc(1, sizeof(Hist));
   if(!undost($1, hist))
     error("undo failed");
+
+  if (CUR_TASK) {
+    free(CUR_TASK);
+    CUR_TASK = NULL;
+  }
   cmdinit();
 }
 ;
@@ -306,6 +310,11 @@ redo: NAME REDO
 {
   if(!redost($1, hist))
     error("redo failed");
+  else {
+    if (CUR_TASK)
+      free(CUR_TASK);
+    CUR_TASK = strdup($1);
+  }
   cmdinit();
 }
 ;
