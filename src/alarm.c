@@ -14,7 +14,7 @@ String PLAYER = "vlc-wrapper";
 int initalarm() {
     DIR *dir;
     struct dirent *ent;
-    String dirname = getenv("TWORK_ALERT");
+    String dirname = TWORK_ALERT;
 
     if (!dirname) {
         error("ALERT DIR isn't valid in env_var ALERT_DIR");

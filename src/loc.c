@@ -24,7 +24,6 @@ const String WRONG_PATH = "can't access givin directory ";
 const String WRONG_GIT_ADD = "couldn't git add to ";
 const String WRONG_GIT_COMMIT = "couldn't git commit to ";
 const String WRONG_GIT_PUSH = "couldn't push repo";
-const String TWORK_DEVELOP = "TWORK_DEVELOP";
 String DEFAULT_MSG = "laboron de tago";
 String GIT_LOG;
 String GIT_DIFF;
@@ -34,7 +33,7 @@ String GIT_PUSH;
 
 //TODO (res) how call function once upon use? after loading hdrs
 void initloc() {
-  DEV_PATH = getenv(TWORK_DEVELOP);
+  DEV_PATH = TWORK_DEVELOP;
   GIT_LOG = cat(5,"cd ", DEV_PATH, ";git submodule foreach git log --author ",AUTHOR, " -n 1");
   GIT_DIFF = cat(3, "cd ", DEV_PATH, ";git submodule foreach git diff --numstat ");
   GIT_ADD = cat(3, "cd ", DEV_PATH, ";git submodule foreach git add --all");

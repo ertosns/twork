@@ -286,28 +286,30 @@ String* list_current_ssf_tasks() {
     String *tasks = list_ssf_tasks();
     if (!tasks)
         return tasks;
-
-    int cnt = 0;
+ 
+    int rm=0, len=0;
     State *laststate;
-    while (tasks[cnt]) {
-      laststate = state(tasks[cnt]);
+    while (tasks[len]) {
+      laststate = state(tasks[len]);
       if (laststate->type != start) {
-	free(tasks[cnt]);
-	tasks[cnt] = NULL;
+	free(tasks[len]);
+	tasks[len] = NULL;
+        rm++;
       }
-      cnt++;
-      if (laststate->type != none) //not static struct
+      if (laststate->type != none)
 	free(laststate);
+      len++;
     }
-    for (int i = 0; i < cnt; i++) {
-      if (!tasks[i]) {
-	for (int j = i+1; j < cnt && tasks[j]; j++) {
-	  tasks[i] =  strdup(tasks[j]);
-	  free(tasks[j]);
-	  tasks[j] = NULL;
-	}
+    
+    for (int i = 0; i<len-rm && !tasks[i]; i++)
+      for (int j = i+1; j < len && tasks[j]; j++) {
+        tasks[i] = strdup(tasks[j]);
+        free(tasks[j]);
+        tasks[j] = NULL;
+        i=j-1;
+        break;
       }
-    }
+    
     return tasks;
 }
 

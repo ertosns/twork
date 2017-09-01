@@ -3,7 +3,6 @@
 #include "linker.h"
 #endif
 #define LOC_HDR
-const String TWORK_DEVELOP;
 
 void initloc();
 /*get last commited hash*/

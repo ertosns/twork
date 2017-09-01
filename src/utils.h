@@ -8,6 +8,7 @@
 #include <dirent.h>
 #ifndef DEBUG
 #include "debug.h"
+#include "../config.h"
 #endif
 #define UTILS
 #define TRUE 1
