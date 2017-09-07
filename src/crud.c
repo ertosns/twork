@@ -345,6 +345,7 @@ Result *sqlRead(String name, Val cols[], int size, int limit, int asc, String cl
 
 Result *sqlReadGrouped(String name, Val cols[], int size, int groupby, int group[], String having, int limit, int asc, String clause)
 {
+<<<<<<< HEAD
     if(notexist(name)) {
         error("table doesn't exists");
         return &(Result) {errorres, .err=&(Err){FAILED}};
@@ -383,6 +384,42 @@ Result *sqlReadGrouped(String name, Val cols[], int size, int groupby, int group
     }
     int rc = sqlite3_exec(database, sql, readTable, NULL,&err_msg);
     return  sqlprologue(rc, sql);
+=======
+  Result *nullRes = &(Result) {errorres, .err=&(Err){FAILED}};
+  if(notexist(name)) {
+    return nullRes;
+  }
+  String sql = "select ";
+  if(!size)
+    sql = cat(2, sql, "ROWID, * ");
+  else
+    for(i = 0; i < size; i++)
+      {
+	sql = cat(2,sql, prependType(cols[i].strep, cols[i].valtype));
+	sql = (i != (size-1)) ?cat(2, sql, ", "):cat(2, sql, " ");
+      }
+  sql = cat(4, sql, "FROM ", name, " ");
+  if(clause)
+    sql = cat(4, sql, " WHERE ", clause, " ");
+  if (groupby) {
+    sql = cat(2, sql, "group by ");
+    for (int i = 0; i < groupby; i++) {
+      sql = cat(3, sql, cols[group[i]].strep, " ");
+      if ( i == groupby-1)
+	sql = cat(2, sql, ", ");
+    }
+  }
+  if (groupby && having)
+    sql = cat(3, sql, "having ", having, " ");
+  if(asc)
+    sql = cat(2, sql, " order by ROWID DESC ");
+  if(limit)
+    sql = cat(3, sql, " LIMIT ", itos(limit));
+  sql = cat(2, sql, ";");
+  des_tbl(table);
+  int rc = sqlite3_exec(database, sql, readTable, NULL, 0);
+  return  sqlprologue(rc, sql);
+>>>>>>> 9f01479... light alarm
 }
 
 Result *readTables()

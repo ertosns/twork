@@ -37,6 +37,7 @@
   long double ldouble;
 }
 
+<<<<<<< HEAD
 %token SQL EXIT NAME INTEGER DOUBLE
 PASSCODE PATH HOURS MINUTES SECONDS
 DEFINITION SLITERAL EOL START STOP EVENT UNDO
@@ -51,6 +52,19 @@ viewlastrecords droptable removelastline
 %type <val> VAL
 %type <inttype> INTEGER exit start stop link TIME_TYPE
 event undo redo accum linktable getcolumns doesexist getstate
+=======
+%token HELP EXIT NAME INTEGER DOUBLE
+HOURS MINUTES SECONDS
+START STOP EVENT UNDO REDO MUTE LIGHT
+ACCUMULATE LINK
+PRINT_COLUMNS DOES_TABLE_EXIST
+VIEW_LAST_RECORDS REMOVE_LAST_RECORD DROP_TABLE
+GET_CURRENT_TASK SSF_START SSF_STOP
+LIST_SSF_TASKS LIST_OPEN_TASKS
+
+%type <chars> EXIT NAME viewlastrecords droptable removelastline
+%type <inttype> INTEGER exit start stop link TIME_TYPE event undo redo accum getcolumns doesexist gettask ssfstart ssfstop listssf listopenssf
+>>>>>>> 9f01479... light alarm
 %type <ldouble> DOUBLE NUMBER
 %%
 
@@ -74,10 +88,22 @@ tablecommand: start
 | accum
 | undo
 | redo
+<<<<<<< HEAD
 | linktable
 | getcolumns
 | doesexist
 | alarm
+=======
+| mute
+| light
+| getcolumns
+| doesexist
+| alarm
+| viewlastrecords
+| removelastline
+| droptable
+| exit
+>>>>>>> 9f01479... light alarm
 ;
 
 general: exit
@@ -199,6 +225,20 @@ undo: NAME UNDO
 }
 ;
 
+mute: MUTE
+{
+  mute_lights();
+  cmdinit();
+}
+;
+
+light: LIGHT
+{
+  lights_flag(LIGHTS_LIGHT);
+  cmdinit();
+}
+;
+
 redo: NAME REDO
 {
   if(!redost($1, hist))
@@ -214,6 +254,7 @@ TIME_TYPE: MINUTES { $$ = MINUTES; };
 
 alarm: NAME NUMBER TIME_TYPE
 {
+<<<<<<< HEAD
   int type = linkabletype($1);
   if(!type)
     error("givin table isn't accumulatable!");
@@ -226,6 +267,21 @@ alarm: NAME NUMBER TIME_TYPE
     case SECONDS: period = $2; break;
     case MINUTES: period = $2*60; break;
     case HOURS: period = $2*60*60; break;
+=======
+  State *ls = last_state($1);
+  if (ls) {
+    if(ls->type != stop)
+      error("conflict action");
+    else {
+      int period;
+      switch ($3) {
+      case SECONDS: period = $2; break;
+      case MINUTES: period = $2*60; break;
+      case HOURS: period = $2*60*60; break;
+      }
+      //TODO add condition for new devices.
+      alert($1, period, LIGHTS_LIGHT);
+>>>>>>> 9f01479... light alarm
     }
     alert($1, period);
   }

@@ -38,10 +38,17 @@ extern void cmdinit();
 "-task" return GET_CURRENT_TASK;
 "-undo" return UNDO;
 "-redo" return REDO;
+<<<<<<< HEAD
 "-dl"|"--add-linkable" return ADD_LINKABLE;
 "-c"|"-create" return CREATE;
 "-i"|"-insert" return INSERT;
 "-u"|"-update" return UPDATE;
+=======
+
+"-mute" return MUTE;
+"-light" return LIGHT;
+
+>>>>>>> 9f01479... light alarm
 "-col"|"-columns" return PRINT_COLUMNS;
 "-exist" return DOES_TABLE_EXIST;
 "-view" return VIEW_LAST_RECORDS;
