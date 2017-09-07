@@ -37,7 +37,7 @@
 
 %token HELP EXIT NAME INTEGER DOUBLE
 HOURS MINUTES SECONDS
-START STOP EVENT UNDO REDO
+START STOP EVENT UNDO REDO MUTE LIGHT
 ACCUMULATE LINK
 PRINT_COLUMNS DOES_TABLE_EXIST
 VIEW_LAST_RECORDS REMOVE_LAST_RECORD DROP_TABLE
@@ -63,6 +63,8 @@ command: command command
 | accum
 | undo
 | redo
+| mute
+| light
 | getcolumns
 | doesexist
 | alarm
@@ -70,7 +72,7 @@ command: command command
 | removelastline
 | droptable
 | exit
-{ cmdinit(); };
+;
 
 help: HELP
 {
@@ -306,6 +308,20 @@ undo: NAME UNDO
 }
 ;
 
+mute: MUTE
+{
+  mute_lights();
+  cmdinit();
+}
+;
+
+light: LIGHT
+{
+  lights_flag(LIGHTS_LIGHT);
+  cmdinit();
+}
+;
+
 redo: NAME REDO
 {
   if(!redost($1, hist))
@@ -337,7 +353,8 @@ alarm: NAME NUMBER TIME_TYPE
       case MINUTES: period = $2*60; break;
       case HOURS: period = $2*60*60; break;
       }
-      alert($1, period);
+      //TODO add condition for new devices.
+      alert($1, period, LIGHTS_LIGHT);
     }
     free(ls);
   }

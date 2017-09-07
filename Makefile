@@ -6,8 +6,7 @@ TWORK_ALERT 	= "/home/ertosns/twork/media"
 TWORK_BACKUP	= "/home/ertosns/twork/backup"
 TWORK_DEVELOP	= "/home/ertosns/prj/twork"
 CC 		= gcc
-#difference between different compilers.
-CFLAGS		= -g -O2 #-std=gnu11 -g3
+CFLAGS		= -g3 #default has optimization, with negative effect on static structs
 LDFLAGS		= -lsqlite3 -lm -lX11
 
 all: bison flex tw install 
@@ -25,8 +24,8 @@ twdbg: $(hdr) $(src)
 	chmod 777 $(TWORK_DEVELOP)/twork
 	gdb -q --args $(TWORK_DEVELOP)/twork -d
 install:
-	mkdir -p $PROF $TWORK_ALERT $TWORK_BACKUP
-	cp twork $PROF
-	chmod 770 $PROF/twork
-	ln -f -s ${TWORK_PROF}/twork /usr/local/bin/twork
+	mkdir -p $(TWORK_PROF) $(TWORK_ALERT) $(TWORK_BACKUP)
+	cp twork $(TWORK_PROF)
+	chmod 770 $(TWORK_PROF)/twork
+	ln -f -s $(TWORK_PROF)/twork /usr/local/bin/twork
 	cp --backup=t $(TWORK_PROF)/twork.db $(TWORK_BACKUP)

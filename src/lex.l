@@ -38,6 +38,9 @@ extern void cmdinit();
 "-undo" return UNDO;
 "-redo" return REDO;
 
+"-mute" return MUTE;
+"-light" return LIGHT;
+
 "-col"|"-columns" return PRINT_COLUMNS;
 "-exist" return DOES_TABLE_EXIST;
 "-view" return VIEW_LAST_RECORDS;

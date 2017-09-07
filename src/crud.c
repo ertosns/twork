@@ -288,9 +288,9 @@ Result *sqlRead(String name, Val cols[], int size, int limit, int asc, String cl
 
 Result *sqlReadGrouped(String name, Val cols[], int size, int groupby, int group[], String having, int limit, int asc, String clause)
 {
+  Result *nullRes = &(Result) {errorres, .err=&(Err){FAILED}};
   if(notexist(name)) {
-    //error("table doesn't exists");
-    return &(Result) {errorres, .err=&(Err){FAILED}};
+    return nullRes;
   }
   String sql = "select ";
   if(!size)
