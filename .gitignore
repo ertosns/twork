@@ -23,10 +23,10 @@
 /*.yy.*
 
 # build
-/config.*
-/Makefile
-/autom4te.cache/
-/autoscan.*
-/configure.scan
-/configure
-/twork
+config.*
+Makefile
+autom4te.cache/
+autoscan.*
+configure.scan
+configure
+twork
