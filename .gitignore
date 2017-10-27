@@ -7,14 +7,14 @@
 /cscope.*
 
 # database
-/**/*.db
+**/*.db
 
 # compiler
-/**/*.out
+**/*.out
 
 # core dump {kernel, valgrind}
-/**/core*
-/**/vgcore*
+**/core*
+**/vgcore*
 
 # bison
 /*.tab.*
@@ -24,9 +24,8 @@
 
 # build
 /config.*
-/install-sh
 /Makefile
-/autom4te.cache/*
+/autom4te.cache/
 /autoscan.*
 /configure.scan
 /configure
