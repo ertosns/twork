@@ -4,7 +4,7 @@ src := $(wildcard src/*.c) $(wildcard *.c)
 TWORK_PROF	= @TWORK_PROF@
 TWORK_ALERT 	= @TWORK_ALERT@
 TWORK_BACKUP	= @TWORK_BACKUP@
-TWORK_DEVELOP	= @TWORK_DEVELOP@
+TWORK_DEVELOP	= @TWORK_DEVELOP@twork
 
 CC 		= @CC@
 CFLAGS		= -g3 #default has optimization, with negative effect on static structs
@@ -30,3 +30,9 @@ install:
 	chmod 770 $(TWORK_PROF)/twork
 	ln -f -s $(TWORK_PROF)/twork /usr/local/bin/twork
 	cp --backup=t $(TWORK_PROF)/twork.db $(TWORK_BACKUP)
+
+bld:
+	autoscan
+	autoheader
+	autoconf
+	./configure

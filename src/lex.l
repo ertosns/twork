@@ -21,20 +21,16 @@ extern void cmdinit();
 
 [\t\v" "] ;
 
-\n {
-  BEGIN(INITIAL);
-}
+"\n" return EOL;
 
 "-help" return HELP;
 "-exit" return EXIT;
 
-"-st"|"-start" return START;
-"-sp"|"-stop" return STOP;
-"-l"|"-link" return LINK;
-"-e"|"-event" return EVENT;
+"-start"  return START;
+"-stop"   return STOP;
+"-event"  return EVENT;
 
 "-task" return GET_CURRENT_TASK;
-
 "-undo" return UNDO;
 "-redo" return REDO;
 
@@ -48,7 +44,6 @@ extern void cmdinit();
 "-r"|"-rlr"|"--remove-last-record" return REMOVE_LAST_RECORD;
 "-d"|"-drop" return DROP_TABLE;
 
-"-accum"|"-acc"|"-accumulate" return ACCUMULATE;
 
 "--start-ssf" return SSF_START;
 "--stop-ssf" return SSF_STOP;

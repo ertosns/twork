@@ -14,40 +14,46 @@ char *colon = ":";
 char *space = " ";
 String SQL_DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
 
-void initutils() {
-
+int initutils() {
+  return SUCCESS;
 }
 
 String cat (int ignore, ...)
 {
-  va_list list;
-  String dest, arg;
-  int Oignore=ignore, size=0;
-  
-  va_start(list, ignore);
   if(!ignore)
     return "";
-  
+  va_list list;
+  String dest, arg;
+  int O_ignore=ignore, size=0;
+  va_start(list, NULL);
   while (ignore-- > 0) {
     arg = va_arg(list, String);
     if (arg)
       size += strlen(arg);
   }
-  va_start(list, ignore);
-  
+  va_start(list, NULL);
   dest = calloc(size+1, sizeof(char));
-  while (Oignore-- > 0)
-    {
-      arg = va_arg(list, String);
-      if(arg == NULL || !strcmp(arg, ""))
-	continue;
+  while (O_ignore-- > 0) {
+    arg = va_arg(list, String);
+    if (arg)
       strncat(dest, (const char*)arg, strlen(arg));
-    }
-  
+  }
   va_end(list);
   return dest;
 }
 
+char* readFile(FILE *f) {
+  if (!f) {
+    return NULL;
+  }
+  
+  fseek(f, 0, SEEK_END);
+  long fsize = ftell(f);
+  rewind(f);
+
+  char *buf = malloc(fsize);
+  return fgets(buf, fsize, f);
+}
 
 int floatdigitsize(long double point, enum floatype type)
 {
@@ -58,13 +64,12 @@ int floatdigitsize(long double point, enum floatype type)
 
 String itos(int integer)
 {
-  int size, tradoff = 1;
-  if(integer < 0) {
-    integer *=-1;
-    tradoff +=1;
+  integer = abs(integer);
+  if (!integer) {
+    return strdup("0");
   }
-  size = (integer)? (int) log10((double)integer): 0 + tradoff;
-  String buffer = malloc((size+1)* sizeof(char));
+  int size = (int)log10((double)integer) + 1;
+  String buffer = malloc(size+1);
   sprintf(buffer, "%d", integer);
   return buffer;
 }
@@ -136,42 +141,47 @@ int getDataType(String colName)
   return sdt_number;
 }
 
+String tm2localstr(struct tm *info) {
+  time_t gmt = timegm(info);
+  return  tm2ts(localtime(&gmt));
+}
+
 String tm2ts(struct tm *info) {
-        char *datestr = malloc(20);
-        strftime(datestr, 20, SQL_DATE_FORMAT, info);
-        return datestr;
+  char *datestr = malloc(20);
+  strftime(datestr, 20, SQL_DATE_FORMAT, info);
+  return datestr;
 }
 
 String getDateTime()
 {
-        time_t secs = time(NULL);
-        struct tm *info = gmtime(&secs);
-        return tm2ts(info);
+  time_t secs = time(NULL);
+  struct tm *info = gmtime(&secs);
+  return tm2ts(info);
 }
 
 int isdirectory(String path) {
-        return opendir(path) != NULL;
+  return opendir(path) != NULL;
 }
 
 int isfiler(String name) {
-        return fopen(name, "r") != NULL;
+  return fopen(name, "r") != NULL;
 }
 
 int isfilew(String name) {
-        return fopen(name, "w") != NULL;
+  return fopen(name, "w") != NULL;
 }
 
 int isfilerw(String name) {
-        return fopen(name, "rw") != NULL;
+  return fopen(name, "rw") != NULL;
 }
 
 int assertcmd(int *status) {
-    //assume shell exists
-    if(*status == -1)
-        error("can't init child process");
-    if(*status != 0)
-        error(cat(2, "cmd failed termination status = ",
-                  itos(*status)));
-    *status = *status == 0;
-    return *status;
+  //assume shell exists
+  if(*status == -1)
+    error("can't init child process");
+  if(*status != 0)
+    error(cat(2, "cmd failed termination status = ",
+              itos(*status)));
+  *status = *status == 0;
+  return *status;
 }

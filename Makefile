@@ -2,9 +2,10 @@ hdr := $(wildcard src/*.h) $(wildcard *.h)
 src := $(wildcard src/*.c) $(wildcard *.c)
 
 TWORK_PROF	= "/home/ertosns/twork"
-TWORK_ALERT 	= "/home/ertosns/twork/media"
+TWORK_ALERT 	= "/home/ertosns/twork/media/"
 TWORK_BACKUP	= "/home/ertosns/twork/backup"
-TWORK_DEVELOP	= "/home/ertosns/prj/twork"
+TWORK_DEVELOP	= "/home/ertosns/prj/"/twork
+
 CC 		= gcc
 CFLAGS		= -g3 #default has optimization, with negative effect on static structs
 LDFLAGS		= -lsqlite3 -lm -lX11
@@ -29,3 +30,9 @@ install:
 	chmod 770 $(TWORK_PROF)/twork
 	ln -f -s $(TWORK_PROF)/twork /usr/local/bin/twork
 	cp --backup=t $(TWORK_PROF)/twork.db $(TWORK_BACKUP)
+
+bld:
+	autoscan
+	autoheader
+	autoconf
+	./configure

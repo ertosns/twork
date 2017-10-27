@@ -582,7 +582,7 @@ PACKAGE_STRING='twork 0.1'
 PACKAGE_BUGREPORT=''
 PACKAGE_URL=''
 
-ac_unique_file="parse.tab.c"
+ac_unique_file="src/utils.c"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -622,6 +622,7 @@ ac_includes_default="\
 ac_header_list=
 ac_func_list=
 ac_subst_vars='LTLIBOBJS
+TWORK_PLAYER
 TWORK_DEVELOP
 TWORK_BACKUP
 TWORK_ALERT
@@ -4127,7 +4128,7 @@ _ACEOF
 
 fi
 
-for ac_header in fcntl.h inttypes.h libintl.h malloc.h stddef.h stdlib.h string.h unistd.h
+for ac_header in fcntl.h inttypes.h libintl.h malloc.h stddef.h stdlib.h string.h unistd.h netdb.h netinet/in.h sys/socket.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -4754,7 +4755,7 @@ if test $ac_cv_func_working_mktime = no; then
 esac
 
 fi
-
+'
 for ac_header in stdlib.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "stdlib.h" "ac_cv_header_stdlib_h" "$ac_includes_default"
@@ -4822,7 +4823,7 @@ $as_echo "#define realloc rpl_realloc" >>confdefs.h
 fi
 
 
-for ac_func in memset pow sqrt strdup strstr
+for ac_func in memset pow sqrt strdup strstr alarm dup2 gethostbyname socket strerror
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -4964,13 +4965,12 @@ PROF=~/$NAME
 PRJ=~/prj
 TWORK_PROF=\"$PROF\"
 #*editable* where you alarm audio files are located
-TWORK_ALERT=\"$PROF/media\"
+TWORK_ALERT=\"$PROF/media/\"
 #*editable* backup for database after each installation
 TWORK_BACKUP=\"$PROF/backup\"
-TWORK_DEVELOP=\"$PRJ/twork\"
-
-CFLAGS=-g3
- #default has optimization, with negative effect on static structs
+TWORK_DEVELOP=\"$PRJ/\"
+#alert player#
+#TWORK_PLAYER=\"'\"
 
 TWORK_PROF=$TWORK_PROF
 
@@ -4980,6 +4980,8 @@ TWORK_BACKUP=$TWORK_BACKUP
 
 TWORK_DEVELOP=$TWORK_DEVELOP
 
+#note it refer to NAME above
+TWORK_PLAYER=\"'amixer -D pulse sset Master unmute; amixer -D pulse sset Master 150%;vlc-wrapper -ZL ~/twork/media/'\"
 
 
 cat >>confdefs.h <<_ACEOF
@@ -5004,6 +5006,11 @@ _ACEOF
 
 cat >>confdefs.h <<_ACEOF
 #define TWORK_DEVELOP $TWORK_DEVELOP
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define TWORK_PLAYER $TWORK_PLAYER
 _ACEOF
 
 

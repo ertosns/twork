@@ -3,7 +3,7 @@
 #endif
 #define CRUD
 
-void initcrud();
+int initcrud();
 /* check givin rc and return error with according
   error message if found */
 Err* handleError(int rc, String command);
@@ -54,5 +54,5 @@ void des_res(Result *res);
 void des_tbl(Table *tbl);
 void des_row(Row *row, int size, int ncol);
 void des_err(Err *err);
-void des_val(Val *      );
-void des_ptr(String *  , int size);
+void des_val(Val *);
+void des_ptr(String * , int size);

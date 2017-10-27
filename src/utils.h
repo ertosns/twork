@@ -1,4 +1,3 @@
-#define _XOPEN_SOURCE
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -47,12 +46,7 @@ typedef struct KeyVal
         Val *val;
         int size;
 } KeyVal;
-typedef struct
-{
-        int status;
-        String command;
-        String err;
-} Err;
+
 /* every val read as string even blob 64base
   from storage prespective binary is optimum,
   fix if needed */
@@ -63,6 +57,13 @@ typedef struct Row
   String *val;
 } Row;
 
+typedef struct
+{
+  int status;
+  String command;
+  String err;
+} Err;
+
 typedef struct Table
 {
   Row *row; // start
@@ -72,6 +73,7 @@ typedef struct Table
   // ncol width
   int *coltype;
   String *colname;
+  
 } Table;
 
 typedef struct Result
@@ -86,14 +88,16 @@ typedef struct Result
 
 
 String SQL_DATE_FORMAT;
-void initutils();
+int initutils();
 String cat(int ignore, ...);
+char* readFile(FILE *f);
 String itos(int integer);
 String ftos(long double f);
 //append type flag for each column name, instead of running Pragma easier to implement
 String prependType(String name, int type);
 String removeColFlag(String name);
 int getDataType(String name);
+String tm2localstr(struct tm *info);
 String tm2ts(struct tm *info);
 String getDateTime();
 int isdirectory(String);

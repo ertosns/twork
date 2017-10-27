@@ -1,12 +1,10 @@
 /*
   code assumed to be organized under ${TWORK_DEVELOP} as submodules
-  using SCV git with .gitignore which assumed to count only
-  code, with authentication, push url configured.
+  using git SCV with appropriate .gitignore which assumed to count only
+  code,an manual authentication, push url configured.
 */
-
 #include "loc.h"
 
-String DEV_PATH;
 const String AUTHOR = "ertosns";
 const String LOC = "LOC";
 const String SUBMODULE  = "SUBMODULE";
@@ -24,21 +22,28 @@ const String WRONG_PATH = "can't access givin directory ";
 const String WRONG_GIT_ADD = "couldn't git add to ";
 const String WRONG_GIT_COMMIT = "couldn't git commit to ";
 const String WRONG_GIT_PUSH = "couldn't push repo";
+const int COMMIT_SHRESHOLD = 86400;
 String DEFAULT_MSG = "laboron de tago";
 String GIT_LOG;
 String GIT_DIFF;
 String GIT_ADD;
 String GIT_COMMIT;
 String GIT_PUSH;
-
+String DEV_PATH;
 //TODO (res) how call function once upon use? after loading hdrs
-void initloc() {
+int initloc() {
   DEV_PATH = TWORK_DEVELOP;
   GIT_LOG = cat(5,"cd ", DEV_PATH, ";git submodule foreach git log --author ",AUTHOR, " -n 1");
   GIT_DIFF = cat(3, "cd ", DEV_PATH, ";git submodule foreach git diff --numstat ");
   GIT_ADD = cat(3, "cd ", DEV_PATH, ";git submodule foreach git add --all");
   GIT_COMMIT = cat(5, "cd ", DEV_PATH, ";git submodule foreach git commit -m\"",DEFAULT_MSG, "\"");
   GIT_PUSH = cat(3, "cd ", DEV_PATH, ";git submodule foreach git push");
+
+  
+  State *ls = last_state(LOC);
+  if (ls->type==none || (int)difftime(time(NULL), timegm(ls->date))>=COMMIT_SHRESHOLD)
+    return loc(NULL);
+  return SUCCESS;
 }
 
 //TODO (fix) unify all linked lists used allover!

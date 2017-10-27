@@ -5,15 +5,35 @@
 #endif
 
 String LINKABLES = "LINKABLES";
-String DAILY_TERMINATED = "DAILYTERM";
 String PUSH_ROW = "PUSH";
 String NAME_COL = "NAME";
 String CUR_TASK = NULL;
-//TODO change word limit {colName}
-//TODO loc fix
-//compare & check strange bug
-void initlinker() { 
-  read_cur_task(); 
+
+int initlinker() { 
+  read_cur_task();
+  return SUCCESS;
+}
+
+String read_cur_task() {
+  int size;
+  String *linkables = listlinkables(&size);
+  State *state;
+  
+  if(CUR_TASK) {
+    free(CUR_TASK);
+    CUR_TASK = NULL;
+  }
+  
+  for (int i = 0; i < size; i++) {
+    state = last_state(linkables[i]);
+    if (state && state->type == start && !is_ssf(linkables[i])) {
+      CUR_TASK = strdup(linkables[i]);
+      free(linkables[i]);
+      return CUR_TASK;
+    }
+    free(linkables[i]);
+  }
+  return NULL;
 }
 
 String* listlinkables(int *size) {
@@ -102,28 +122,7 @@ int addlinkable(String tablename) {
   return rc;
 }
 
-int isfresh(String name) {
-  int fresh = 0;
-  Result *linkableres = NULL;
-  Result *dtres = NULL;
-  String targetTable;
-  if (notexist(name))
-    goto des;
-  
-  linkableres = sqlReadFull(name);
-  if(!linkableres->table)
-    goto des;
-  
-  targetTable = cat(8, prependType(NAME_COL, sdt_type), " = '", name,  "' AND ", prependType(PUSH_ROW, sdt_number), " >= ", itos(lastrowid(name)), " ");
-  dtres = sqlRead(DAILY_TERMINATED, 0, 0, 1, 1, targetTable);
-  fresh = dtres->table == NULL;
-  
- des:
-  des_res(linkableres);
-  des_res(dtres);
-  des_ptr(&targetTable, 1);
-  return fresh;
-}
+
 
 int removelinkable(String table) {
   int success = 0;
@@ -133,45 +132,3 @@ int removelinkable(String table) {
   return 1;
 }
 
-
-int link_accumulatables() {
-  int size, suc;
-  String *linkables = listlinkables(&size);
-  String cols[] = { DAILY_TERMINATED, NAME_COL, PUSH_ROW };
-  for (int i = 0; i < size; i++) {
-    if (isfresh(linkables[i])) {
-	Val vals[] = { makeval(linkables[i], sdt_type),
-		       makeval(itos(lastrowid(linkables[i])), sdt_number) };
-	suc = sqlInsert(cols, vals, 2);
-	des_val(&vals[0]);
-    }
-  }
-  if (!dbgmode)
-    loc(NULL);
-
-  des_ptr(linkables, size);
-  return suc;
-}
-
-
-String read_cur_task() {
-  int size;
-  String *linkables = listlinkables(&size);
-  State *state;
-  
-  if(CUR_TASK) {
-    free(CUR_TASK);
-    CUR_TASK = NULL;
-  }
-  
-  for (int i = 0; i < size; i++) {
-    state = last_state(linkables[i]);
-    if (state && state->type == start && !is_ssf(linkables[i])) {
-      CUR_TASK = strdup(linkables[i]);
-      free(linkables[i]);
-      return CUR_TASK;
-    }
-    free(linkables[i]);
-  }
-  return NULL;
-}

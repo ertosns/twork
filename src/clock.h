@@ -7,19 +7,13 @@
 
 /*
   features
-   - transactions handling
-   - history, for undo, and redo.
-   - accumulated accumulatable table
+   - events transactions
+   - history for undo/redo.
 
-  ACCUMULATABLE TABLE
+   clocked TABLE
   ----------------------------
   |ROWID|D_DATE|N_VAL|N_STATE|
   ----------------------------
-  !created extactly per givin name
-
-  VAL_ACCUMULATED IF STATE IS even, push, otherwise
-  it's DATE_ACCUMULATED.
-
 */
 
 const int accumulatable;
@@ -28,14 +22,8 @@ String STATE;
 String VAL;
 String DATE; //default
 
-enum statetype {
-  event = 4, // VAL_ACCUMULATED
-  start = 5, // DATE_ACCUMULATED
-  stop = 6,  // ~
-  push = 7,  // termination state
-  none = -1,
-  undo = -2, // functionality state.
-};
+enum statetype
+  { event = 4,/*has numerical value*/ start = 5, stop = 6, none = 0, undo = -1, redo = -2  };
 
 typedef struct State {
   int type;
@@ -47,7 +35,7 @@ typedef struct State {
 /* history is useful within short
    period and per table and gets nulled iff
    - new records for the same table
-   - [OR] history creation for different table*/
+   || history creation for different table*/
 typedef struct Hist {
   State *current;
   struct Hist *previous;
@@ -55,6 +43,9 @@ typedef struct Hist {
 } Hist;
 
 
+int initclock();
+/*insert state with date happend at most before min minutes.*/
+int latestate(String ctable, String dval, int state, long long sec);
 /* Create ctable with givin name if not exists,
   validate and push start state */
 int startst(String ctable);
@@ -62,8 +53,6 @@ int startst(String ctable);
 int stopst(String ctable);
 /* for VALUED-ACCUMULATED TABLE */
 int eventst(String ctable, String dval);
-/* validate, push end state, calls accumulate*/
-State *pushst(String ctable);
 /* view last state */
 State* last_state(String);
 State* state(String ctable);
@@ -74,12 +63,10 @@ int ssf_stop(String);
 String* list_ssf_tasks();
 String* list_current_ssf_tasks();
 int is_ssf(String);
-int undost(String ctable, Hist *history);
+int undost(String ctable);
 /* redo and prune state histoy */
-int redost(String ctable, Hist *history);
+int redost(String ctable);
+void freestate(State *state);
 /* zerostate means table unfresh upon linking */
 State *zerostate();
-/* assumes table is fresh
-   validate last state is push,
-   accumulate last day data with start rowid */
-State *accumulate (String table);
+int validstate(String ctable, int st);

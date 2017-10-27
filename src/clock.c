@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE
+#define _GNU_SOURCE
 #include <string.h>
 #include <time.h>
 #include "crud.h"
@@ -8,10 +10,7 @@
 #ifndef LINKER
 #include "linker.h"
 #endif
-#define LOCHEADER
-
-//todo fix state start->stop, event
-//todo accumulation table chagned
+#include "debug.h"
 
 const int accumulatable = 1;
 const int naccumulatable = 0;
@@ -20,6 +19,22 @@ String VAL = "VAL";
 String DATE = "DATE"; //default column
 String SSF = "SSF";
 String SSF_TASK = "SSF_TASK";
+Hist *hist;
+
+int initclock() {
+  hist = calloc(1, sizeof(Hist));
+  return SUCCESS;
+}
+
+void pophist(Hist *history) {
+  if (history) {
+    hist = history->previous;
+    hist->size = history->size--;
+    freestate(history->current);
+    free(history);
+  }
+}
+
 Hist *addhist(Hist *prev, State *cur) {
   Hist *history = malloc(sizeof(Hist));
   Hist *histprev;
@@ -34,53 +49,74 @@ Hist *addhist(Hist *prev, State *cur) {
   return history;
 }
 
-extern Hist *hist;
-void pophist(Hist *history) {
-    hist = history->previous;
+int undost(String ctable) {
+  if(!validstate(ctable, undo)) {
+    error("can't undo, no prior record is present!");
+    return FAILED;
+  }
+  State *st = state(ctable);
+  hist = addhist(hist, st);
+  return deleteLastRow(ctable);
+}
+
+int redost(String ctable) {
+  if (hist == NULL || hist->size < 1) {
+    error("can't redo, history is empty!");
+    return FAILED;
+  }
+  Val vals[] = {
+    makeval(tm2localstr(hist->current->date), sdt_date),
+    makeval(itos(hist->current->val), sdt_double),
+    makeval(itos(hist->current->type), sdt_number),
+  };
+  pophist(hist);
+  String names[] = {ctable, DATE, VAL, STATE};
+  return sqlInsert(names, vals, 3);
+}
+
+
+String period2stamp(String ctable, long long sec) {
+  State *state = last_state(ctable);
+  struct tm *date = state->date; //utc
+  time_t currentTime = time(NULL);//utc
+  double diff = difftime(currentTime, timegm(date));
+  diff = sec%(long)diff;
+  time_t stamp = currentTime-diff;
+  return tm2ts(gmtime(&stamp));
 }
 
 void createTclk(String ctable) {
-    Val stateval[] = { makeval(VAL, sdt_double),
-                       makeval(STATE, sdt_number)};
-    sqlCreate(ctable, stateval, 2);
+  Val stateval[] = { makeval(VAL, sdt_double),
+                     makeval(STATE, sdt_number)};
+  sqlCreate(ctable, stateval, 2);
 }
 
-
+//TODO IMPLEMENT AUTO COL-NAME GRAPPER.
 int insertts(String ctable, String dval, int state) {
-    Val vals[] = { makeval((dval)?dval:"0", sdt_double),
-                   makeval(itos(state), sdt_number) };
-    String names[] = {ctable, VAL, STATE};
-    return sqlInsert(names, vals, 2);
+  Val vals[] = { makeval((dval)?dval:"0", sdt_double),
+                 makeval(itos(state), sdt_number) };
+  String names[] = {ctable, VAL, STATE};
+  return sqlInsert(names, vals, 2);
 }
 
-/*valid states
-  none-->start
-  start->stop
-  stop-->push
-  stop-->start
-  push-->start
-  start->undo
-  stop-->undo
-
-  none-->event
-  event->event
-  event->push
-  push->event
-  event->undo
-*/
-
-//TODOS passing static ptr for initialization gets overwritten
+int lateinsertts(String ctable, String dval, int state, long long sec){
+  Val vals[] = { makeval(period2stamp(ctable, sec), sdt_date),
+                 makeval((dval)?dval:"0", sdt_double),
+                 makeval(itos(state), sdt_number) };
+  String names[] = {ctable, DATE, VAL, STATE};
+  return sqlInsert(names, vals, 3);
+}
 
 String strstate(int state) {
-    switch(state) {
-    case event: return "event";
-    case start: return "start";
-    case stop: return "stop";
-    case push: return "push";
-    case none: return "none";
-    case undo: return "undo";
-    }
-    return NULL;
+  switch(state) {
+  case event: return "event";
+  case start: return "start";
+  case undo: return "undo";
+  case redo: return "redo";
+  case stop: return "stop";
+  case none: return "none";
+  }
+  return NULL;
 }
 
 int validstate(String ctable, int st) {
@@ -91,42 +127,43 @@ int validstate(String ctable, int st) {
       error(cat(2, "empty table expecting start|event but gets ", strstate(st)));
       return 0;
     }
-    return 1;
+    break;
   case start:
-    if (!(st == stop || st == undo)) {
-      error(cat(2, "start state expecting stop|undo but gets ", strstate(st)));
+    if (st != stop && st != undo) {
+      error(cat(2, "start state expecting stop but gets ", strstate(st)));
       return 0;
     }
-    return 1;
+    break;
   case stop:
-    if (!(st == undo || st == push || st == start)) {
-      error(cat(2, "stop state expecting undo|push|start but gets ", strstate(st)));
+    if (st != start && st != undo) {
+      error(cat(2, "stop state expecting start but gets ", strstate(st)));
       return 0;
     }
-    return 1;
-  case push:
-    if (!(st == start || st == event)) {
-      error(cat(2, "push expecting start|event but gets ", strstate(st)));
-      return 0;
-    }
-    return 1;
+    break;
   case event:
-    if(!(st == event || st == push || st == undo)) {
-      error(cat(2, "event expecting event|push|undo but gets ", strstate(st)));
+    if (st != event) {
+      error(cat(2, "event expecting event but gets ", strstate(st)));
       return 0;
     }
-    return 1;
+    break;
   default:
-    error("unkown state!");
+      error("unkown state!");
     return FAILED;
   }
-  //TODO (res)  does freeing laststate free laststate->date?
-  free(laststate->date);
-  free(laststate);
+  freestate(laststate);
   return SUCCESS;
 }
 
-void tableres2states(Table *table, State *states) {
+void freestate(State *state) {
+  if (!state)
+    return;
+  if (state->date && state->type!=none)
+    free(state->date);
+  free(state);
+}
+
+void tableres2states(Table *table, State *states)
+{
   Row *rw = table->row;
   for(int r = 0; r < table->size && rw; r++) {
     states[r].rowid = atoi(rw->val[0]);
@@ -138,69 +175,34 @@ void tableres2states(Table *table, State *states) {
   }
 }
 
-//TODO (fix) warning -> rm extern, why gcc isn't smart enough?
-extern int linkablexists(String);
-
-State *accumulate (String table) {
-  
-  if (!linkablexists(table)) {
-    printf("not accumulated table");
-    return NULL;
+int latestate(String ctable, String dval, int state, long long sec) {
+  if (notexist(ctable)) {
+    highlight("can't late insert to not existing table!");
+    return FAILED;
   }
   
-  String getpushid = cat(4, prependType(NAME_COL, sdt_type) , " = '",table, "' ");
-  Result *pushidres = sqlRead(DAILY_TERMINATED, 0, 0 , 1, 1, getpushid);
-  char *clause = cat(2, " ROWID > ",
-		     (!pushidres->table)?itos(0):pushidres->table->row->val[3]);
-  Result *res = sqlRead(table, 0, 0, 0, 0, clause);
-  if (!res->table) {
-    free(pushidres);
-    free(res);
-    return zerostate();
-  }
-  State *states = malloc(res->table->size*sizeof(State));
-  tableres2states(res->table, states);
-  State *restate = calloc(1, sizeof(State));
-  if (states[0].type == start) {
-    for (int i = 0; i < res->table->size -1; i++) {
-      restate->val += difftime(mktime(states[i].date), mktime(states[i++].date));
-    }
-    restate->val/=60;
-  }
-  else if (states[0].type == event) {
-    for (int i = 0; i < res->table->size; i++) {
-      restate->val+=states[i].val;
-    }
-  }
+  if(validstate(ctable, state))
+    return lateinsertts(ctable, dval, state, sec);
+  else error("unvalid state");
   
-  restate->date = malloc(sizeof(struct tm));
-  memcpy(restate->date, states[0].date, sizeof(struct tm));
-  restate->rowid = states[0].rowid;
-  
-  free(pushidres);
-  free(states);
-  free(res);
-  return restate;
+  return FAILED;
 }
-
 
 int startst(String ctable) {
-    if(notexist(ctable)) {
-        createTclk(ctable);
-        highlight(cat(2, "new clock table created: ", ctable));
-        addlinkable(ctable);
-    }
-
-    if(validstate(ctable, start))
-        return insertts(ctable, 0, start);
-    else error("unvalid state");
-    return FAILED;
+  if (notexist(ctable)) {
+    createTclk(ctable);
+    addlinkable(ctable);
+    highlight(cat(2, "new clock table created: ", ctable));
+  }
+  
+  if(validstate(ctable, start))
+    return insertts(ctable, 0, start);
+  else error("unvalid state");
+  return FAILED;
 }
-
 
 int stopst(String ctable) {
   if(notexist(ctable)) {
-    error(cat(2, "can't push stop state, table doesn't exists with name: ", ctable));
     return none;
   }
   
@@ -212,11 +214,12 @@ int stopst(String ctable) {
 
 int eventst(String ctable, String dval) {
   if(notexist(ctable))
-        createTclk(ctable);
+    createTclk(ctable);
   if(validstate(ctable, event))
-        return insertts(ctable, dval, event);
+    return insertts(ctable, dval, event);
   return FAILED;
 }
+
 
 State *zerostate() {
   State *state = malloc(sizeof(State));
@@ -228,11 +231,11 @@ State *zerostate() {
 }
 
 State *state(String ctable) {
+  
   Result *res = sqlRead(ctable, 0, 0, 1, 1, 0);
-  handleRes(res);
-
   if (res->type == errorres || !res->table)
     return zerostate();
+  handleRes(res);
 
   State *states = malloc(res->table->size*sizeof(State));
   tableres2states(res->table, states);
@@ -244,17 +247,12 @@ State* last_state(String ctable) {
   return state(ctable);
 }
 
-/*int ssf_task_exist(String table) {
-    String cols[] = { makeval(SSF) };
-    sqlRead(SSF, )
-    }*/
-
 int ssf_start(String ctable) {
     if (notexist(SSF)) {
         Val cols[] =  { makeval(SSF_TASK, sdt_type) };
         assert(sqlCreate(SSF, cols, 1));
     }
-    if (notexist(ctable)) { //todo fix
+    if (notexist(ctable)) {
         Val vals[] = { makeval(ctable, sdt_type) };
         String cols[] = { SSF, SSF_TASK };
         assert(sqlInsert(cols, vals, 1));
@@ -284,9 +282,9 @@ String* list_ssf_tasks() {
 
 String* list_current_ssf_tasks() {
     String *tasks = list_ssf_tasks();
-    if (!tasks)
-        return tasks;
- 
+    if (!tasks[0])
+      return NULL;
+    
     int rm=0, len=0;
     State *laststate;
     while (tasks[len]) {
@@ -296,20 +294,23 @@ String* list_current_ssf_tasks() {
 	tasks[len] = NULL;
         rm++;
       }
-      if (laststate->type != none)
-	free(laststate);
+      freestate(laststate);
       len++;
     }
     
-    for (int i = 0; i<len-rm && !tasks[i]; i++)
-      for (int j = i+1; j < len && tasks[j]; j++) {
-        tasks[i] = strdup(tasks[j]);
-        free(tasks[j]);
-        tasks[j] = NULL;
-        i=j-1;
-        break;
+    // O(len)
+    for (int i = 0; i<len; i++) {
+      if (tasks[i])
+        continue;
+      for (int j = i+1; j < len; j++) {
+        if (tasks[j]) {
+          tasks[i] = tasks[j];                      
+          tasks[j] = NULL;
+          i=j-1;
+          break;
+        }
       }
-    
+    }
     return tasks;
 }
 
@@ -324,31 +325,4 @@ int is_ssf(String name) {
       return SUCCESS;
   }
   return FAILED;
-}
-    
-extern Hist *hist;
-int undost(String ctable, Hist *history) {
-  if(!validstate(ctable, undo)) {
-        error("can't undo, no prior record is present!");
-        return FAILED;
-  }
-  State *st = state(ctable);
-  hist = addhist(history, st);
-  return deleteLastRow(ctable);
-}
-
-int redost(String ctable, Hist *hist) {
-  if (hist == NULL || hist->size < 1) {
-        error("can't redo, history is empty!");
-        return FAILED;
-  }
-  Val vals[] = {
-        makeval(tm2ts(hist->current->date), sdt_date),
-        makeval(itos(hist->current->val), sdt_double),
-        makeval(itos(hist->current->type), sdt_number),
-  };
-  pophist(hist);
-  printf("redo val[0] %s\n", vals[0].strep);
-  String names[] = {ctable, DATE, VAL, STATE};
-  return sqlInsert(names, vals, 3);
 }

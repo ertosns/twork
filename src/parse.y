@@ -1,4 +1,5 @@
 %{
+
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
@@ -15,17 +16,17 @@
 #ifndef ATRACK
 #include "src/atrack.h"
 #endif
+#ifndef CLOCK
+#include "src/clock.h"
+#endif
   
   void yyerror(const char *);
   void cmdinit();
   void nothing();
   int rule; //what is the current rule being parsing
   int def_sdt_type; //givin sdt_type for current keyval pair
-  Hist *hist;
-  String historytable = NULL;
-  extern int isfresh(String);
   siginfo_t *siginfo;
-%}
+  %}
 
 %define parse.error verbose
 %union {
@@ -35,32 +36,33 @@
   long double ldouble;
 }
 
-%token HELP EXIT NAME INTEGER DOUBLE
-HOURS MINUTES SECONDS
-START STOP EVENT UNDO REDO MUTE LIGHT
-ACCUMULATE LINK
+%token HELP EXIT NAME INTEGER DOUBLE START STOP EVENT
+HOURS MINUTES SECONDS  UNDO REDO MUTE LIGHT
 PRINT_COLUMNS DOES_TABLE_EXIST
 VIEW_LAST_RECORDS REMOVE_LAST_RECORD DROP_TABLE
 GET_CURRENT_TASK SSF_START SSF_STOP
-LIST_SSF_TASKS LIST_OPEN_TASKS
+LIST_SSF_TASKS LIST_OPEN_TASKS EOL
 
 %type <chars> EXIT NAME viewlastrecords droptable removelastline
-%type <inttype> INTEGER exit start stop link TIME_TYPE event undo redo accum getcolumns doesexist gettask ssfstart ssfstop listssf listopenssf
-%type <ldouble> DOUBLE NUMBER
+
+%type <inttype> INTEGER
+exit startcmd stopcmd  eventcmd undo redo getcolumns alarm
+doesexist gettask ssfstart ssfstop listssf listopenssf
+
+%type <ldouble> DOUBLE NUMBER SEC
 %%
 
 command: command command
+| command EOL
 | help
-| start
-| stop
-| event
-| link
+| startcmd
+| stopcmd
+| eventcmd
 | ssfstart
 | ssfstop
 | listssf
 | listopenssf
 | gettask
-| accum
 | undo
 | redo
 | mute
@@ -130,20 +132,7 @@ and actions {start, stop, event}. \
         push start on given start-stop TABLE, and alert after TIME  period according to SCALE {sec|s|seconds|second} for seconds, 
         {min|minute|minutes|m} for mintues, {hours|hour|hr|hrs|h} for hours.
         alert does using choosing alarming mean as described below
-     
-   TABLE -l|link
-        link workd of day, associate all start-stop, event class tables with occurance date, add worke of day see below.";
-  printf("%s\n", help);
   */
-}
-;
-
-exit: EXIT
-{
-  finalizecrud();
-  printf("exiting...\n");
-  exit(0);
-  $$ = 0;
 }
 ;
 
@@ -151,75 +140,57 @@ NUMBER: INTEGER { $$ = (double)$1; }
 | DOUBLE { $$ = $1; }
 ;
 
-stop: NAME STOP
+SEC: NUMBER SECONDS { $$ = $1; };
+| NUMBER MINUTES    { $$ = $1*60; };
+| NUMBER HOURS      { $$ = $1*60*60; };
+;
+
+startcmd: NAME START
 {
-  
+  stopst(read_cur_task());
+  if (!startst($1))
+    error("start failed");  
+  cmdinit();
+}
+| NAME START SEC
+{
+  stopst(read_cur_task());
+  if (!latestate($1, NULL, start, $3))
+    error("start failed");
+  //TODO check history, and that blow repetitive snippet.}
+  cmdinit();
+}
+;
+
+stopcmd: NAME STOP
+{  
   if(!stopst($1))
-    error("stop failed");
-  else {
-    if(!hist) {
-      free(hist);
-      hist = NULL;
-    }
-  }
-  CUR_TASK = NULL;
+    error("stop failed");   
+  cmdinit();
+}
+| NAME STOP SEC
+{
+  if (!latestate($1, NULL, stop, $3))
+    error("start failed");
   cmdinit();
 }
 ;
 
-start: NAME START
-{
-  //TODO prevent multitasking, also with event
-  //change viewing {5,6,0} -> {start, stop, event}
-  String opened;
-  if ( (opened = read_cur_task()) )
-    error(cat(3, "failed! other task ", opened, " running"));
-  else {
-    if (!startst($1))
-      error("start failed");
-    else {
-      CUR_TASK = strdup($1);
-      if (!hist) {
-	free(hist);
-	hist = NULL;
-      }
-    }
-  }
-  cmdinit();
-}
-;
-
-event: NAME DOUBLE EVENT
-{
-
-  if ( read_cur_task() )
-    error(cat(3, "failed! task ", $1, " opened"));
-  else {
-    if(!eventst($1, ftos($2)))
-      error("event failed");
-    else {
-      if(!hist) {
-	free(hist);
-	hist = NULL;
-      }
-    }
-  }
-  cmdinit();
-}
-|NAME INTEGER EVENT
+eventcmd: NAME NUMBER EVENT
 {
   if ( read_cur_task() )
     error(cat(3, "failed! task ", $1, " opened"));
+  
   else {
-    if(!eventst($1, itos($2)))
+    if(!eventst($1, ftos((double)$2)))
       error("event failed");
-    else {
-      if(!hist) {
-	free(hist);
-	hist = NULL;
-      }
-    }
   }
+  cmdinit();
+}
+|NAME NUMBER EVENT SEC
+{
+  if (!latestate($1, ftos((double)$2), event, (long long) $4))
+    error("start failed");
   cmdinit();
 }
 ;
@@ -269,41 +240,18 @@ gettask: GET_CURRENT_TASK
 }
 ;
 
-accum: NAME ACCUMULATE
+undo: NAME UNDO
 {
-    if(notexist($1))
-        printf("givin table doesn't exist\n");
-    if (isfresh($1)) {
-        State *st = accumulate($1);
-        if(st)
-            printf("accumulated %LF of %s today\n keep it up!" ,st->val, $1);
-        else
-            printf("no data yet!\n");
-    }
-    else
-        printf("table isn't fresh\n");
-    cmdinit();
+  if(!undost($1))
+    error("undo failed");
+  cmdinit();
 }
 ;
 
-undo: NAME UNDO
+redo: NAME REDO
 {
-  if(!historytable || strcmp($1, historytable)) {
-    if(!hist) {
-      free(hist);
-      hist = NULL;
-    }
-    historytable = $1;
-  }
-  if(!hist)
-      hist = calloc(1, sizeof(Hist));
-  if(!undost($1, hist))
-    error("undo failed");
-
-  if (CUR_TASK) {
-    free(CUR_TASK);
-    CUR_TASK = NULL;
-  }
+  if(!redost($1))
+    error("redo failed");
   cmdinit();
 }
 ;
@@ -322,55 +270,10 @@ light: LIGHT
 }
 ;
 
-redo: NAME REDO
+alarm: NAME SEC
 {
-  if(!redost($1, hist))
-    error("redo failed");
-  else {
-    if (CUR_TASK)
-      free(CUR_TASK);
-    CUR_TASK = strdup($1);
-  }
-  cmdinit();
-}
-;
-
-TIME_TYPE: MINUTES { $$ = MINUTES; };
-| HOURS { $$ = HOURS; };
-| SECONDS { $$ = SECONDS; };
-;
-
-alarm: NAME NUMBER TIME_TYPE
-{
-  State *ls = last_state($1);
-  if (ls) {
-    if(ls->type != stop)
-      error("conflict action");
-    else {
-      int period;
-      switch ($3) {
-      case SECONDS: period = $2; break;
-      case MINUTES: period = $2*60; break;
-      case HOURS: period = $2*60*60; break;
-      }
-      //TODO add condition for new devices.
-      alert($1, period, LIGHTS_LIGHT);
-    }
-    free(ls);
-  }
-  cmdinit();
-}
-;
-
-link: LINK
-{
-  if(!link_accumulatables())
-    error("link failed");
-  else {
-    if(!hist) {
-      free(hist);
-      hist = NULL;
-    }
+  if (validstate($1, start)) {
+    alert($1, $2, LIGHTS_LIGHT);
   }
   cmdinit();
 }
@@ -408,6 +311,15 @@ viewlastrecords: NAME INTEGER VIEW_LAST_RECORDS
   }
   cmdinit();
 }
+|NAME VIEW_LAST_RECORDS
+{
+  Result *res = sqlReadFull($1);
+  if (res->type == tableres) {
+    viewTable();
+    free(res);
+  }
+  cmdinit();
+}
 ;
 
 removelastline: NAME REMOVE_LAST_RECORD
@@ -424,13 +336,24 @@ droptable: NAME DROP_TABLE
 }
 ;
 
+exit: EXIT
+{
+  finalizecrud();
+  printf("exiting...\n");
+  exit(0);
+  $$ = 0;
+}
+;
+
 %%
 
 void yyerror (const char *s) {
-  error(cat(9,"error!\n", (char *)s, "\n\nparser content:\n",
-            "  string:", yylval.chars,
-            "\n  int:", itos(yylval.inttype),
-            "\n  long double:", ftos(yylval.ldouble)));
+   error(cat(9,"error!\n", (char *)s, "\n\nparser content:\n",
+            "string:", yylval.chars,
+            "\nint:", itos(yylval.inttype),
+            "\nlong double:", ftos(yylval.ldouble)));
+  
+  highlight("unvalid command!");
 }
 
 void cmdinit() {
@@ -444,11 +367,12 @@ void catch(int sig, siginfo_t *info, void *ignore) {
 }
 
 void init() {
-  initlinker();
-  initutils();
-  initcrud();
-  initalarm();
-  initloc();
+  assert(initlinker());
+  assert(initutils());
+  assert(initcrud());
+  assert(initalarm());
+  assert(initclock());
+  assert(initloc());
   //initatrack(); //use zeitgeist instead
   String *tasks = list_current_ssf_tasks();
   int cnt = 0;
@@ -464,6 +388,7 @@ void init() {
 
 int main(int argc, char **argv)
 {
+  //TODO change word limit {colName}
   if(argc > 1) {
     if (!strcmp(argv[1],  "-d")) {
       dbgmode = 1;

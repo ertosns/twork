@@ -1,18 +1,33 @@
-# etags
+# tags
 /GRTAGS
 /GPATH
 /GSYMS
 /GTAGS
 /TAGS
+/cscope.*
 
 # database
 /**/*.db
+
 # compiler
 /**/*.out
+
 # core dump {kernel, valgrind}
 /**/core*
 /**/vgcore*
+
 # bison
 /*.tab.*
+
 # lex
 /*.yy.*
+
+# build
+/config.*
+/install-sh
+/Makefile
+/autom4te.cache/*
+/autoscan.*
+/configure.scan
+/install-sh
+

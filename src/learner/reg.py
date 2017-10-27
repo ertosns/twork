@@ -19,7 +19,7 @@ def tota_reg():
         val_coef.append([vectors[0]+'_value_x1_coef', reg.fit(x, val)[1]])
         
         freq = [day[2] for day in activity]
-        task_ceof.append([vectors[0]+'_frequency_x1_coef', reg.fit(x, freq)[1]])
+        freq_ceof.append([vectors[0]+'_frequency_x1_coef', reg.fit(x, freq)[1]])
         
         col+=1
     return [val_coef, freq_coef]
@@ -31,5 +31,4 @@ def display_tota_relation():
         #format
         print act[0]+'     '+repr(act[1])
 
-pass implement higher regression modules.
-pass implement activity, trackers.
+def 

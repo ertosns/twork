@@ -2,9 +2,12 @@
 #ifndef LINKER
 #include "linker.h"
 #endif
+#ifndef CLOCK
+#include "clock.h"
+#endif
 #define LOC_HDR
 
-void initloc();
+int initloc();
 /*get last commited hash*/
 String getcomithash();
 /*git diff between last locally stored commits

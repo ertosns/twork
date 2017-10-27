@@ -19,11 +19,17 @@
    */
 #define HAVE_ALLOCA_H 1
 
+/* Define to 1 if you have the `dup2' function. */
+/* #undef HAVE_DUP2 */
+
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `fork' function. */
 #define HAVE_FORK 1
+
+/* Define to 1 if you have the `gethostbyname' function. */
+/* #undef HAVE_GETHOSTBYNAME */
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
@@ -38,7 +44,7 @@
 #define HAVE_LIBSQLITE3 1
 
 /* Define to 1 if you have the `X11' library (-lX11). */
-#define HAVE_LIBX11 1
+/* #undef HAVE_LIBX11 */
 
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */
@@ -51,14 +57,23 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `memset' function. */
-#define HAVE_MEMSET 1
+/* #undef HAVE_MEMSET */
+
+/* Define to 1 if you have the <netdb.h> header file. */
+#define HAVE_NETDB_H 1
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#define HAVE_NETINET_IN_H 1
 
 /* Define to 1 if you have the `pow' function. */
 /* #undef HAVE_POW */
 
 /* Define to 1 if your system has a GNU libc compatible `realloc' function,
    and to 0 otherwise. */
-#define HAVE_REALLOC 1
+/* #undef HAVE_REALLOC */
+
+/* Define to 1 if you have the `socket' function. */
+/* #undef HAVE_SOCKET */
 
 /* Define to 1 if you have the `sqrt' function. */
 /* #undef HAVE_SQRT */
@@ -73,7 +88,10 @@
 #define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `strdup' function. */
-#define HAVE_STRDUP 1
+/* #undef HAVE_STRDUP */
+
+/* Define to 1 if you have the `strerror' function. */
+/* #undef HAVE_STRERROR */
 
 /* Define to 1 if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H 1
@@ -82,7 +100,10 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strstr' function. */
-#define HAVE_STRSTR 1
+/* #undef HAVE_STRSTR */
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#define HAVE_SYS_SOCKET_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
@@ -141,13 +162,16 @@
 #define TIME_WITH_SYS_TIME 1
 
 /* where readable alert audio files are located */
-#define TWORK_ALERT "/home/ertosns/twork/media"
+#define TWORK_ALERT "/home/ertosns/twork/media/"
 
-/* where twork.db(database) file is backed after installation */
+/* where twork.dbTWORK_PLAYER(database) file is backed after installation */
 #define TWORK_BACKUP "/home/ertosns/twork/backup"
 
 /* twork development location */
-#define TWORK_DEVELOP "/home/ertosns/prj/twork"
+#define TWORK_DEVELOP "/home/ertosns/prj/"
+
+/* alert player command */
+#define TWORK_PLAYER "amixer -D pulse sset Master unmute; amixer -D pulse sset Master 150%;vlc-wrapper -ZL ~/twork/media/"
 
 /* twork profile directory */
 #define TWORK_PROF "/home/ertosns/twork"
