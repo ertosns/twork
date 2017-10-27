@@ -24,7 +24,7 @@
 **/*.out
 
 # build
-/config.h
+/config.*
 /Makefile
 /autom4te.cache/
 /autoscan.*
