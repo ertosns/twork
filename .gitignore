@@ -29,5 +29,5 @@
 /autom4te.cache/*
 /autoscan.*
 /configure.scan
-/install-sh
-
+/configure
+/twork

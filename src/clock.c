@@ -282,7 +282,7 @@ String* list_ssf_tasks() {
 
 String* list_current_ssf_tasks() {
     String *tasks = list_ssf_tasks();
-    if (!tasks[0])
+    if (!tasks)
       return NULL;
     
     int rm=0, len=0;
