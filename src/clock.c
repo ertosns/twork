@@ -12,8 +12,6 @@
 #endif
 #include "debug.h"
 
-const int accumulatable = 1;
-const int naccumulatable = 0;
 String STATE = "STATE";
 String VAL = "VAL";
 String DATE = "DATE"; //default column
@@ -230,21 +228,24 @@ State *zerostate() {
   return state;
 }
 
-State *state(String ctable) {
-  
+State *state(String ctable, int *size) {  
   Result *res = sqlRead(ctable, 0, 0, 1, 1, 0);
-  if (res->type == errorres || !res->table)
+  if (res->type == errorres || !res->table) {
+    *size = 0;
     return zerostate();
+  }
   handleRes(res);
-
   State *states = malloc(res->table->size*sizeof(State));
   tableres2states(res->table, states);
+  *size = res->table->size;
   free(res);
   return states;
 }
 
 State* last_state(String ctable) {
-  return state(ctable);
+  int size;
+  State *states =  state(ctable, &size);
+  return states[size-1];
 }
 
 int ssf_start(String ctable) {
@@ -326,3 +327,35 @@ int is_ssf(String name) {
   }
   return FAILED;
 }
+
+//impl within_tm, diff_tm
+float cumulate (String ctable, tm *start_stamp, tm *stop_stamp, int *type) {
+  float tota = 0;
+  int size;
+  tm* task_start_stamp = NULL;
+  State *states = state(ctable, &size);
+  switch (states[0].type) {
+  case start:
+  case stop:
+    *type = start;
+  case event:
+    *type = event;
+  default:
+    error("unexpected state type");
+    return;
+  }
+  State state;
+  for (int i = 0; i <size; i++) {
+    state = state[i]
+    if (within_tm(states.date, start_stamp, stop_stamp)) {
+      if (state.type == stop && task_start_stamp)
+        float+=diff_tm(task_start_stamp, states.date);
+      else if (state.type == stop)
+        task_start_stamp = states[i].date;
+      else if (state.type == event)
+        tota++;
+    }
+  }
+  return tota;
+}
+

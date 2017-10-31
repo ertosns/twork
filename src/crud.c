@@ -17,6 +17,7 @@ String USR_DB;
 String DEV_DB = "file:/tmp/twork/twork.db";
 Table *copyTable();
 Result *sqlprologue(int, String);
+String ROWID = "ROWID";
 
 int initcrud() {
   USR_DB = cat(3, "file:", TWORK_PROF , "/twork.db");
@@ -110,7 +111,7 @@ void viewTable()
 
 int readTable(void *pt, int argc, char **argv, char **colName)
 {
-  if(table == NULL) {
+  if (table == NULL) {
     table = calloc(1, sizeof(Table));
     table->ncol = argc;
     table->colname = malloc(argc * sizeof(String));
@@ -129,7 +130,7 @@ int readTable(void *pt, int argc, char **argv, char **colName)
     table->current = table->current->nxt;
   }
   
-  for(int i = 0; i < argc; i++) {
+  for (int i = 0; i < argc; i++) {
     if(argv[i])
       table->current->val[i] = strdup(argv[i]);
     else

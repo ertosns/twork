@@ -3,6 +3,7 @@
 #endif
 #define CRUD
 
+String ROWID;
 int initcrud();
 /* check givin rc and return error with according
   error message if found */

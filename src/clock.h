@@ -1,5 +1,4 @@
 #include <time.h>
-
 #ifndef UTILS
 #include "utils.h"
 #endif
@@ -16,8 +15,6 @@
   ----------------------------
 */
 
-const int accumulatable;
-const int naccumulatable;
 String STATE;
 String VAL;
 String DATE; //default
@@ -51,11 +48,11 @@ int latestate(String ctable, String dval, int state, long long sec);
 int startst(String ctable);
 /* validate and push stop state */
 int stopst(String ctable);
-/* for VALUED-ACCUMULATED TABLE */
+/* for VALUED-CUMULATED TABLE */
 int eventst(String ctable, String dval);
+State* state(String ctable);
 /* view last state */
 State* last_state(String);
-State* state(String ctable);
 /* validate, remove last state iff {start, stop},
    expand and add new state to history*/
 int ssf_start(String);
@@ -70,3 +67,5 @@ void freestate(State *state);
 /* zerostate means table unfresh upon linking */
 State *zerostate();
 int validstate(String ctable, int st);
+/* cumulate clocked table values time for start/stop, or occurances for evented table */
+float cumulate (String ctable, tm *start_stamp, tm *stop_stamp, int *type);

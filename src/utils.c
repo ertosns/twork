@@ -18,6 +18,17 @@ int initutils() {
   return SUCCESS;
 }
 
+String* append(String *array, int size, String record) {
+  String *res = malloc(size*sizeof(String));
+  for (int i = 0; i < size; i++) {
+    res[i] = strdup(array[i]);
+    free(array[i]);
+  }
+  if (array)
+    free(array);
+  res[size] = strdup(record);
+}
+
 String cat (int ignore, ...)
 {
   if(!ignore)
@@ -144,6 +155,13 @@ int getDataType(String colName)
 String tm2localstr(struct tm *info) {
   time_t gmt = timegm(info);
   return  tm2ts(localtime(&gmt));
+}
+
+tm* ts2tm(String ts) {
+  tm *tmfrag;
+  strptime(ts, SQL_DATE_FORMAT, &tmfrag);
+  time_t local = timegm(&tmfrag);
+  return localtime(&local);
 }
 
 String tm2ts(struct tm *info) {
