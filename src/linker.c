@@ -3,6 +3,9 @@
 #ifndef LOCHEADER
 #include "loc.h"
 #endif
+#ifndef SSF
+#include "ssf.h"
+#endif
 
 String LINKABLES = "LINKABLES";
 String PUSH_ROW = "PUSH";
@@ -14,7 +17,7 @@ int initlinker() {
   return SUCCESS;
 }
 
-String read_cur_task() {
+String read_open_task() {
   int size;
   String *linkables = listlinkables(&size);
   State *state;
@@ -28,12 +31,30 @@ String read_cur_task() {
     state = last_state(linkables[i]);
     if (state && state->type == start && !is_ssf(linkables[i])) {
       CUR_TASK = strdup(linkables[i]);
-      free(linkables[i]);
+      des_ptr(linkables, size);
+      freestate(state);
       return CUR_TASK;
     }
-    free(linkables[i]);
+    freestate(state);
   }
+  des_ptr(linkables, size);
   return NULL;
+}
+
+String read_cur_task() {
+  String open = read_open_task();
+  SSF *tree = read_tree(open, NULL);
+  int child_num = 0;
+  SSF child = tree->children?tree->children[child_num++]:NULL;
+  while (child) {
+    State *state = last_state(child.name);
+    if (state->type==start)
+      open = strdup(child.name);
+    freestate(state);
+    child = tree->children[child_num++];
+  }
+  freessf(tree);
+  return open;
 }
 
 String* listlinkables(int *size) {
@@ -128,7 +149,7 @@ int removelinkable(String table) {
   int success = 0;
   deleteTable(table);
   deleteRecords(LINKABLES, cat(4, prependType(NAME_COL, sdt_type), " = '", table, "' "));
-  deleteRecords(DAILY_TERMINATED, cat(4, prependType(NAME_COL, sdt_type), " = '", table, "' "));
+  break_leaf(table);
   return 1;
 }
 

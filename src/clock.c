@@ -187,12 +187,22 @@ int latestate(String ctable, String dval, int state, long long sec) {
 }
 
 int startst(String ctable) {
+  SSF parent;
+  SSF *tree
   if (notexist(ctable)) {
     createTclk(ctable);
     addlinkable(ctable);
     highlight(cat(2, "new clock table created: ", ctable));
+  } else { /*start the ssf parent hierarchy */
+    tree = read_tree(ctable, NULL);
+    parent = parent->parent?parent->parent[0]:NULL;
+    while (parent) {
+      assert(!notexist(parent->name));
+      startst(parent->name);
+      parent = parent->parent;
+    }
+    freessf(parent);
   }
-  
   if(validstate(ctable, start))
     return insertts(ctable, 0, start);
   else error("unvalid state");
@@ -200,10 +210,20 @@ int startst(String ctable) {
 }
 
 int stopst(String ctable) {
+  int child_num = 0;
+  SSF child;
+  SSF *tree;
   if(notexist(ctable)) {
     return none;
+  } else { /*stop the ssf children hierarchy */
+    tree = read_tree(ctable, NULL);
+    child = child->children?child->children[child_num++]:NULL;
+    while (child) {
+      assert(!notexist(child.name));
+      stopst(child.name);
+      child = child->children[child_num++];
+    }
   }
-  
   if (validstate(ctable, stop))
     return insertts(ctable, 0, stop);
   else error("unvalid state");
@@ -261,6 +281,7 @@ int ssf_start(String ctable) {
     return startst(ctable);
 }
 
+/*
 int ssf_stop(String ctable) {
     return stopst(ctable);
 }
@@ -327,6 +348,7 @@ int is_ssf(String name) {
   }
   return FAILED;
 }
+*/
 
 //impl within_tm, diff_tm
 float cumulate (String ctable, tm *start_stamp, tm *stop_stamp, int *type) {

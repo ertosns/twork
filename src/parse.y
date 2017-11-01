@@ -19,6 +19,12 @@
 #ifndef CLOCK
 #include "src/clock.h"
 #endif
+#ifndef PIVOT
+#include "src/pivot.h"
+#endif
+#ifndef SSF
+#include "src/ssf.h"
+#endif
   
   void yyerror(const char *);
   void cmdinit();
@@ -40,14 +46,14 @@
 HOURS MINUTES SECONDS  UNDO REDO MUTE LIGHT
 PRINT_COLUMNS DOES_TABLE_EXIST
 VIEW_LAST_RECORDS REMOVE_LAST_RECORD DROP_TABLE
-GET_CURRENT_TASK SSF_START SSF_STOP
-LIST_SSF_TASKS LIST_OPEN_TASKS EOL
+GET_CURRENT_TASK PIV_START PIV_DEL
+LIST_PIVS LIST_OPEN_PIVS BRANCH_BREAK BRANCH_START BREAK_LEAF PIVOT EOL
 
 %type <chars> EXIT NAME viewlastrecords droptable removelastline
 
 %type <inttype> INTEGER
 exit startcmd stopcmd  eventcmd undo redo getcolumns alarm
-doesexist gettask ssfstart ssfstop listssf listopenssf
+doesexist gettask pivstart pivdel listpivs listopenpivs branchstart branchbreak breakleaf pivot
 
 %type <ldouble> DOUBLE NUMBER SEC
 %%
@@ -58,10 +64,14 @@ command: command command
 | startcmd
 | stopcmd
 | eventcmd
-| ssfstart
-| ssfstop
-| listssf
-| listopenssf
+| branchstart
+| branchbreak
+| breakleaf
+| pivstart
+| pivot
+| pivdel
+| listpivs
+| listopenpivs
 | gettask
 | undo
 | redo
@@ -195,40 +205,70 @@ eventcmd: NAME NUMBER EVENT
 }
 ;
 
-ssfstart: NAME SSF_START
+branchstart: NAME NAME BRANCH_START
 {
-    ssf_start($1);
-    cmdinit();
-}
-;
-
-ssfstop: NAME SSF_STOP
-{
-    ssf_stop($1);
-    cmdinit();
-}
-;
-
-listssf: LIST_SSF_TASKS
-{
-  String *list = list_ssf_tasks();
-  if (list) {
-    for (int i = 0; list[i]; i++)
-      printf("(%d) %s\n",i, list[i]);
-    free(list);
-  }
+  add_branch($1, $2);
   cmdinit();
 }
 ;
 
-listopenssf: LIST_OPEN_TASKS
+branchbreak: NAME NAME BRANCH_BREAK
 {
-  String *list = list_current_ssf_tasks();
-  if (list) {
-    for (int i = 0; list[i]; i++)
-      printf("(%d) %s\n",i, list[i]);
-    free(list);
-  }
+  break_branch($1, $2);
+  cmdinit();
+}
+;
+
+breakleaf: NAME BREAK_LEAF
+{
+  break_leaf($1);
+  cmdinit();
+}
+;
+
+pivstart: NAME PIV_START
+{
+start_pivot($1);
+cmdinit();
+}
+;
+
+pivot: NAME PIVOT
+{
+String piv = cumulate_pivot_str($1);
+if (piv) {
+highlight(piv);
+free(piv);
+}
+cmdinit();
+}
+;
+
+pivdel: NAME PIV_DEL
+{
+    del_pivot($1);
+    cmdinit();
+}
+;
+
+listpivs: LIST_PIVS
+{
+  int size;
+  String *list = list_pivots(&size);
+  for (int i = 0; i<size; i++)
+    printf("(%d) %s\n",i, list[i]);
+  free_ptr(list);
+  cmdinit();
+}
+;
+
+listopenpivs: LIST_OPEN_PIVS
+{
+  int size;
+  String *list = list_current_pivots(&size);
+  for (int i = 0; i<size; i++)
+    printf("(%d) %s\n",i, list[i]);
+  free_ptr(list);
   cmdinit();
 }
 ;
@@ -374,16 +414,14 @@ void init() {
   assert(initclock());
   assert(initloc());
   //initatrack(); //use zeitgeist instead
-  String *tasks = list_current_ssf_tasks();
-  int cnt = 0;
-  if (tasks) {
-    highlight("open ssf tasks");
-    while (tasks[cnt]) {
-      printf("(%d) %s\n", cnt, tasks[cnt]);
-      free(tasks[cnt]);
-      cnt++;
-    }
-  }
+  int size;
+  String *pivs = list_current_pivs(&size);
+  if (size>0)
+    highlight("open pivots");
+  for (int i = 0; i < size; i++)
+      printf("(%d) %s\n", cnt, pivs[i]);
+  if (size>0)
+    free_ptr(pivs);
 }
 
 int main(int argc, char **argv)

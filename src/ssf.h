@@ -7,23 +7,40 @@
 #ifndef CLOCK
 #include <clock.h>
 #endif
-
+#define SSF
 
 /*
-  - ssf is a forest not a tree.
-  - each node has a unique name.
+  - SSF is a forest not a tree, or start/stop kind of table
+  - each node has a unique name of valid clocked table name under linkables.
   - each node has one parent, and arbitrary children.
-  - each node_name is name of valid table name under linkables.
+  - node can't equal it's parent.
   - if node is active, then it's parent is active.
-  - ssf has to be start/stop kind of table.
+  - results: 
+    - time spend in node >+ total time spend on it's nodes.
+    - only one leaf is active at a time.
+  
+
   SSF_TABLE 
-  ||timestamp||parent_name||node_name||state||
+  ||timestamp||node_name||parent_name||state||
 
 */
+
+const int ROOT;
+const int LEAF;
 
 struct SSF {
   String name;
   int state;
-  SSF *parent; /*null iff tree root*/
-  SSF *childs; /*null terminated*/
+  SSF *parent;
+  SSF *children; /*null terminated*/
 } SSF;
+
+void add_branch(String node, String parent);
+void break_branch(String node, String parent);
+void break_leaf(String node);
+/* 
+   start nodes starts it's parent in un-symmetric relation 
+   return tree for prespective of given node, 
+*/
+SSF* read_tree(String node, SFF *tree);
+void freessf(SSF *node);

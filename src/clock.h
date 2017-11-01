@@ -3,7 +3,9 @@
 #include "utils.h"
 #endif
 #define CLOCK
-
+#ifndef SSF
+#include "ssf.h"
+#endif
 /*
   features
    - events transactions
@@ -53,13 +55,15 @@ int eventst(String ctable, String dval);
 State* state(String ctable);
 /* view last state */
 State* last_state(String);
-/* validate, remove last state iff {start, stop},
-   expand and add new state to history*/
+/*
+// validate, remove last state iff {start, stop},
+//   expand and add new state to history
 int ssf_start(String);
 int ssf_stop(String);
 String* list_ssf_tasks();
 String* list_current_ssf_tasks();
 int is_ssf(String);
+*/
 int undost(String ctable);
 /* redo and prune state histoy */
 int redost(String ctable);

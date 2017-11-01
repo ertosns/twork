@@ -45,10 +45,14 @@ extern void cmdinit();
 "-d"|"-drop" return DROP_TABLE;
 
 
-"--start-ssf" return SSF_START;
-"--stop-ssf" return SSF_STOP;
-"--list-ssf" return LIST_SSF_TASKS;
-"--list-open-ssf" return LIST_OPEN_TASKS;
+"--start-branch" return BRANCH_START;
+"--break_branch" return BRANCH_BREAK;
+"--break_leaf"   return BREAK_LEAF;
+"--start-piv" return PIV_START;
+"-pivot" return PIVOT;
+"--del-piv" return PIV_DEL;
+"--list-pivs" return LIST_PIVS;
+"--list-open-pivs" return LIST_OPEN_PIVS;
 
 "sec"|"s"|"seconds"|"second" return SECONDS;
 "min"|"minute"|"minutes"|"m" return MINUTES;
