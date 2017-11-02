@@ -1,11 +1,26 @@
-#include <time.h>
-#ifndef UTILS
-#include "utils.h"
-#endif
 #define CLOCK
-#ifndef SSF
+
+#ifndef DEBUG
+#include "debug.h"
+#endif
+
+#ifndef CRUD
+#include "crud.h"
+#endif
+
+#ifndef CLOCK
+#include "clock.h"
+#endif
+
+#ifndef LINKER
+#include "linker.h"
+#endif
+
+#ifndef SSF_H
 #include "ssf.h"
 #endif
+
+
 /*
   features
    - events transactions
@@ -52,7 +67,7 @@ int startst(String ctable);
 int stopst(String ctable);
 /* for VALUED-CUMULATED TABLE */
 int eventst(String ctable, String dval);
-State* state(String ctable);
+State *state(String ctable, int *size);
 /* view last state */
 State* last_state(String);
 /*
@@ -72,4 +87,4 @@ void freestate(State *state);
 State *zerostate();
 int validstate(String ctable, int st);
 /* cumulate clocked table values time for start/stop, or occurances for evented table */
-float cumulate (String ctable, tm *start_stamp, tm *stop_stamp, int *type);
+float cumulate (String ctable, struct tm *start_stamp, struct tm *stop_stamp, int *type);

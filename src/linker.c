@@ -1,11 +1,4 @@
-#include <string.h>
 #include "linker.h"
-#ifndef LOCHEADER
-#include "loc.h"
-#endif
-#ifndef SSF
-#include "ssf.h"
-#endif
 
 String LINKABLES = "LINKABLES";
 String PUSH_ROW = "PUSH";
@@ -29,7 +22,7 @@ String read_open_task() {
   
   for (int i = 0; i < size; i++) {
     state = last_state(linkables[i]);
-    if (state && state->type == start && !is_ssf(linkables[i])) {
+    if (state && state->type == start) {
       CUR_TASK = strdup(linkables[i]);
       des_ptr(linkables, size);
       freestate(state);
@@ -45,13 +38,13 @@ String read_cur_task() {
   String open = read_open_task();
   SSF *tree = read_tree(open, NULL);
   int child_num = 0;
-  SSF child = tree->children?tree->children[child_num++]:NULL;
+  SSF *child = tree->children?tree->children:NULL;
   while (child) {
-    State *state = last_state(child.name);
+    State *state = last_state(child->name);
     if (state->type==start)
-      open = strdup(child.name);
+      open = strdup(child->name);
     freestate(state);
-    child = tree->children[child_num++];
+    child = tree->children+(child_num++*8);
   }
   freessf(tree);
   return open;

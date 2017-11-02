@@ -1,28 +1,33 @@
 %{
 
-#include <stdio.h>
-#include <assert.h>
 #include <ctype.h>
 #include <signal.h>
+  
 #ifndef ALARM
 #include "src/alarm.h"
 #endif
+  
 #ifndef LINKER
 #include "src/linker.h"
 #endif
-#ifndef LOC_HDR
+  
+#ifndef LOCHEADER
 #include "src/loc.h"
 #endif
+  
 #ifndef ATRACK
 #include "src/atrack.h"
 #endif
+  
 #ifndef CLOCK
 #include "src/clock.h"
 #endif
-#ifndef PIVOT
+  
+#ifndef PIVOTHEADER
 #include "src/pivot.h"
 #endif
-#ifndef SSF
+  
+#ifndef SSF_H
 #include "src/ssf.h"
 #endif
   
@@ -219,28 +224,34 @@ branchbreak: NAME NAME BRANCH_BREAK
 }
 ;
 
-breakleaf: NAME BREAK_LEAF
+
+pivstart: NAME PIV_START
 {
-  break_leaf($1);
+  start_pivot($1);
   cmdinit();
 }
 ;
 
-pivstart: NAME PIV_START
+
+breakleaf: NAME BREAK_LEAF
 {
-start_pivot($1);
-cmdinit();
+  break_leaf($1);
+  cmdinit(); 
 }
 ;
 
 pivot: NAME PIVOT
 {
-String piv = cumulate_pivot_str($1);
-if (piv) {
-highlight(piv);
-free(piv);
-}
-cmdinit();
+  Pivot *piv = get_pivot($1);
+  if (piv) {
+    String pivstr = cumulate_pivot_str(piv);
+    if (piv) {
+      highlight(pivstr);
+      free(pivstr);
+    }
+    freepiv(piv);
+  }
+  cmdinit();
 }
 ;
 
@@ -253,11 +264,11 @@ pivdel: NAME PIV_DEL
 
 listpivs: LIST_PIVS
 {
-  int size;
+int size;
   String *list = list_pivots(&size);
   for (int i = 0; i<size; i++)
     printf("(%d) %s\n",i, list[i]);
-  free_ptr(list);
+  des_ptr(list, size);
   cmdinit();
 }
 ;
@@ -268,7 +279,7 @@ listopenpivs: LIST_OPEN_PIVS
   String *list = list_current_pivots(&size);
   for (int i = 0; i<size; i++)
     printf("(%d) %s\n",i, list[i]);
-  free_ptr(list);
+  des_ptr(list, size);
   cmdinit();
 }
 ;
@@ -415,13 +426,13 @@ void init() {
   assert(initloc());
   //initatrack(); //use zeitgeist instead
   int size;
-  String *pivs = list_current_pivs(&size);
+  String *pivs = list_current_pivots(&size);
   if (size>0)
     highlight("open pivots");
   for (int i = 0; i < size; i++)
-      printf("(%d) %s\n", cnt, pivs[i]);
+      printf("(%d) %s\n", i, pivs[i]);
   if (size>0)
-    free_ptr(pivs);
+    des_ptr(pivs, size);
 }
 
 int main(int argc, char **argv)

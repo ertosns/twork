@@ -1,13 +1,14 @@
+#define SSF_H
+
 #ifndef CRUD
-#include <crud.h>
+#include "crud.h"
 #endif
-#ifndef UTILS
-#include <utils.h>
-#endif
+
 #ifndef CLOCK
-#include <clock.h>
+#include "clock.h"
 #endif
-#define SSF
+
+
 
 /*
   - SSF is a forest not a tree, or start/stop kind of table
@@ -25,22 +26,20 @@
 
 */
 
-const int ROOT;
-const int LEAF;
-
-struct SSF {
+typedef struct SSF
+{
+  struct SSF* parent;
+  struct SSF* children; /*null terminated*/
   String name;
   int state;
-  SSF *parent;
-  SSF *children; /*null terminated*/
 } SSF;
 
 void add_branch(String node, String parent);
 void break_branch(String node, String parent);
 void break_leaf(String node);
-/* 
+/*
    start nodes starts it's parent in un-symmetric relation 
    return tree for prespective of given node, 
 */
-SSF* read_tree(String node, SFF *tree);
+SSF* read_tree(String node, SSF *tree);
 void freessf(SSF *node);

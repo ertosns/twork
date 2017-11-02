@@ -1,22 +1,11 @@
 #define _XOPEN_SOURCE
 #define _GNU_SOURCE
-#include <string.h>
-#include <time.h>
-#include "crud.h"
+
 #include "clock.h"
-#ifndef CRUD
-#include "crud.h"
-#endif
-#ifndef LINKER
-#include "linker.h"
-#endif
-#include "debug.h"
 
 String STATE = "STATE";
 String VAL = "VAL";
 String DATE = "DATE"; //default column
-String SSF = "SSF";
-String SSF_TASK = "SSF_TASK";
 Hist *hist;
 
 int initclock() {
@@ -52,7 +41,7 @@ int undost(String ctable) {
     error("can't undo, no prior record is present!");
     return FAILED;
   }
-  State *st = state(ctable);
+  State *st = last_state(ctable);
   hist = addhist(hist, st);
   return deleteLastRow(ctable);
 }
@@ -118,7 +107,7 @@ String strstate(int state) {
 }
 
 int validstate(String ctable, int st) {
-  State *laststate = state(ctable);
+  State *laststate = last_state(ctable);
   switch(laststate->type) {
   case none:
     if (!(st == start || st == event)) {
@@ -187,21 +176,21 @@ int latestate(String ctable, String dval, int state, long long sec) {
 }
 
 int startst(String ctable) {
-  SSF parent;
-  SSF *tree
+  SSF *parent;
+  SSF *tree;
   if (notexist(ctable)) {
     createTclk(ctable);
     addlinkable(ctable);
     highlight(cat(2, "new clock table created: ", ctable));
   } else { /*start the ssf parent hierarchy */
     tree = read_tree(ctable, NULL);
-    parent = parent->parent?parent->parent[0]:NULL;
+    parent = tree->parent?tree->parent:NULL;
     while (parent) {
       assert(!notexist(parent->name));
       startst(parent->name);
       parent = parent->parent;
     }
-    freessf(parent);
+    freessf(tree);
   }
   if(validstate(ctable, start))
     return insertts(ctable, 0, start);
@@ -211,18 +200,19 @@ int startst(String ctable) {
 
 int stopst(String ctable) {
   int child_num = 0;
-  SSF child;
+  SSF *child;
   SSF *tree;
   if(notexist(ctable)) {
     return none;
   } else { /*stop the ssf children hierarchy */
     tree = read_tree(ctable, NULL);
-    child = child->children?child->children[child_num++]:NULL;
+    child = tree->children?tree->children+(child_num++):NULL;
     while (child) {
-      assert(!notexist(child.name));
-      stopst(child.name);
-      child = child->children[child_num++];
+      assert(!notexist(child->name));
+      stopst(child->name);
+      child = child->children+(child_num++*8);
     }
+    freessf(tree);
   }
   if (validstate(ctable, stop))
     return insertts(ctable, 0, stop);
@@ -248,7 +238,7 @@ State *zerostate() {
   return state;
 }
 
-State *state(String ctable, int *size) {  
+State *state(String ctable, int *size) {
   Result *res = sqlRead(ctable, 0, 0, 1, 1, 0);
   if (res->type == errorres || !res->table) {
     *size = 0;
@@ -265,9 +255,43 @@ State *state(String ctable, int *size) {
 State* last_state(String ctable) {
   int size;
   State *states =  state(ctable, &size);
-  return states[size-1];
+  for (int i = 0; i < size-1; i++)
+    freestate(states+i*8);
+  return states+((size-1)*8);
 }
 
+
+float cumulate (String ctable, struct tm *start_stamp, struct tm *stop_stamp, int *type) {
+  float tota = 0;
+  int size;
+  struct tm* task_start_stamp = NULL;
+  State *states = state(ctable, &size);
+  switch (states[0].type) {
+  case start:
+  case stop:
+    *type = start;
+  case event:
+    *type = event;
+  default:
+    error("unexpected state type");
+    return tota;
+  }
+  State state;
+  for (int i = 0; i <size; i++) {
+    state = states[i];
+    if (within_tm(state.date, start_stamp, stop_stamp)) {
+      if (state.type == stop && task_start_stamp)
+        tota+=difftime((time_t)timegm(task_start_stamp), (time_t)timegm(state.date));
+      else if (state.type == stop)
+        task_start_stamp = state.date;
+      else if (state.type == event)
+        tota++;
+    }
+  }
+  return tota;
+}
+
+/*
 int ssf_start(String ctable) {
     if (notexist(SSF)) {
         Val cols[] =  { makeval(SSF_TASK, sdt_type) };
@@ -281,7 +305,7 @@ int ssf_start(String ctable) {
     return startst(ctable);
 }
 
-/*
+
 int ssf_stop(String ctable) {
     return stopst(ctable);
 }
@@ -349,35 +373,3 @@ int is_ssf(String name) {
   return FAILED;
 }
 */
-
-//impl within_tm, diff_tm
-float cumulate (String ctable, tm *start_stamp, tm *stop_stamp, int *type) {
-  float tota = 0;
-  int size;
-  tm* task_start_stamp = NULL;
-  State *states = state(ctable, &size);
-  switch (states[0].type) {
-  case start:
-  case stop:
-    *type = start;
-  case event:
-    *type = event;
-  default:
-    error("unexpected state type");
-    return;
-  }
-  State state;
-  for (int i = 0; i <size; i++) {
-    state = state[i]
-    if (within_tm(states.date, start_stamp, stop_stamp)) {
-      if (state.type == stop && task_start_stamp)
-        float+=diff_tm(task_start_stamp, states.date);
-      else if (state.type == stop)
-        task_start_stamp = states[i].date;
-      else if (state.type == event)
-        tota++;
-    }
-  }
-  return tota;
-}
-

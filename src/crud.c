@@ -1,14 +1,10 @@
 #define _XOPEN_SOURCE
 #define _GNU_SOURCE
+#define CRUD
+
 #include <regex.h>
-#include <string.h>
-#include <assert.h>
 #include <sqlite3.h>
-#include <time.h>
 #include "crud.h"
-#ifndef DEBUG
-#include "debug.h"
-#endif
 
 sqlite3 *database;
 Table *table;
@@ -180,10 +176,11 @@ Val *makevalptr(String strep, int valtype)
   return val;
 }
 
-//debug
 Val makeval(String strep, int valtype) {
   Val *ptr = makevalptr(strep, valtype);
-  return *ptr;
+  Val val = *ptr;
+  des_val(ptr);
+  return val;
 }
 
 void exec(int command, KeyVal *keyval, String tname, String clause)

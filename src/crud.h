@@ -1,7 +1,7 @@
 #ifndef UTILS
 #include "utils.h"
 #endif
-#define CRUD
+
 
 String ROWID;
 int initcrud();

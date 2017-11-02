@@ -1,7 +1,8 @@
+#define ALARM
+
 #ifndef UTILS
 #include "utils.h"
 #endif
-#define ALARM
 
 const char LIGHTS_LIGHT;
 const char LIGHTS_ON;

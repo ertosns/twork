@@ -1,11 +1,16 @@
-#include <stdlib.h>
+/*
+  code assumed to be organized under ${TWORK_DEVELOP} as submodules
+  using git SCV with appropriate .gitignore which assumed to count only
+  code,an manual authentication, push url configured. */
+#define LOCHEADER
+
 #ifndef LINKER
 #include "linker.h"
 #endif
+
 #ifndef CLOCK
 #include "clock.h"
 #endif
-#define LOC_HDR
 
 int initloc();
 /*get last commited hash*/

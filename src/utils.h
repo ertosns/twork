@@ -1,15 +1,17 @@
-#include <time.h>
+#define UTILS
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include <stdarg.h>
 #include <dirent.h>
+#include "../config.h"
+
 #ifndef DEBUG
 #include "debug.h"
-#include "../config.h"
 #endif
-#define UTILS
+
 #define true 1
 #define false 0
 #define TRUE 1
@@ -95,7 +97,9 @@ String prependType(String name, int type);
 String removeColFlag(String name);
 int getDataType(String name);
 String tm2localstr(struct tm *info);
-tm* ts2tm(String ts);
+bool within_tm(struct tm*, struct tm*, struct tm*);
+struct tm* ts2tm(String ts);
+struct tm* current_tm();
 String tm2ts(struct tm *info);
 String getDateTime();
 int isdirectory(String);

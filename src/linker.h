@@ -1,10 +1,16 @@
+#define LINKER
+
 #ifndef CRUD
 #include "crud.h"
 #endif
+
 #ifndef CLOCK
 #include "clock.h"
 #endif
-#define LINKER
+
+#ifndef LOCHEADER
+#include "loc.h"
+#endif
 
 
 String LINKABLES;

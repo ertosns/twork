@@ -1,10 +1,12 @@
+#define ATRACK
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifndef UTILS
 #include "utils.h"
 #endif
-#define ATRACK
+
 typedef struct session {
     String date;
     String task;

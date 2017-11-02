@@ -1,8 +1,3 @@
-/*
-  code assumed to be organized under ${TWORK_DEVELOP} as submodules
-  using git SCV with appropriate .gitignore which assumed to count only
-  code,an manual authentication, push url configured.
-*/
 #include "loc.h"
 
 const String AUTHOR = "ertosns";

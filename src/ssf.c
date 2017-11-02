@@ -1,23 +1,20 @@
-#include <ssf.h>
-#define SSF
+#include "ssf.h"
 
-const String tbl[] = {"SSFTABLE", "NODE", "PARENT"};
-const int ROOT = 1;
-const int LEAF = 2;
+String columns[] = {"SSFTABLE", "NODE", "PARENT"};
 
 bool validade(String node, String parent) {
   if (!strcmp(node, parent))
       return false;
-  if (notexist(tbl[0])) {
+  if (notexist(columns[0])) {
     Val vals[] = { makeval(NULL, sdt_type),
-                   makeval(NULL, std_type) };
-    sqlCreate(tbl, vals, 2);
+                   makeval(NULL, sdt_type) };
+    sqlCreate(columns[0], vals, 2);
   }
   
-  State *state = state(node);
+  State *state = last_state(node);
   if (state->type != start && state->type != stop) {
     error("unvalid table type");
-    freestate(state)
+    freestate(state);
     return false;
   }
   
@@ -26,18 +23,18 @@ bool validade(String node, String parent) {
   bool valid = false;
   for (int i = 0; i < size; i++) {
     if (!strcmp(linkables[i], node)) {
-      unvalid = true;
+      valid = true;
       break;
     }
   }
-  free_ptr(linkables, size);
-  freestate(state)
+  des_ptr(linkables, size);
+  freestate(state);
   return valid;
 }
 
 bool valid_node(String ssf) {
-  Val cols[] = { makeval(tbl[1], std_type) };
-  Result *res = sqlRead(tbl, cols, 1, 0, 0, 0);
+  Val cols[] = { makeval(columns[1], sdt_type) };
+  Result *res = sqlRead(columns[0], cols, 1, 0, 0, 0);
   Row *row = res->table->row;
   for (int i = 0; i < res->table->size; i++) {
     if (!strcmp(ssf, row->val[3])) {
@@ -51,47 +48,46 @@ bool valid_node(String ssf) {
 }
 
 void break_branch(String node, String parent) {
-  String clause = cat(7, prependType(tbl[1], std_type), " = ", node, " and ", prependType(tbl[2], std_type), " = ", parent);
-  deleteRecords(tbl[0], clause);
+  String clause = cat(7, prependType(columns[1], sdt_type), " = ", node, " and ", prependType(columns[2], sdt_type), " = ", parent);
+  deleteRecords(columns[0], clause);
 }
 
 void break_leaf(String node) {
-  String clause = cat(3, prependType(tbl[1], std_type), " = ", node);
-  deleteRecords(tbl[0], clause);
+  String clause = cat(3, prependType(columns[1], sdt_type), " = ", node);
+  deleteRecords(columns[0], clause);
 }
   
 
 void freessf(SSF *node) {
-  if (ssf->parent)
-    free(ssf->parent);
+  if (node->parent)
+    free(node->parent);
   int child_num = 0;
-  SSF child = node->children?node->children[child_num++]:NULL;
+  SSF *child = node->children?node->children:NULL;
   while (child) {
     freessf(child);
-    child = children[child_num++]; //null-terminated
+    child = node->children+(child_num++*8); //null-terminated
   }
   free(node);
 }
 //append child to null-terminated list.
 SSF* append_child(SSF *tree, SSF *child, int child_num) {
-  SSF *children = malloc((child_num+2)*sizeof(SSF));
+  SSF **children = malloc((child_num+2)*sizeof(SSF*));
   for (int i = 0; i < child_num; i++) {
-    memcp(children[i], tree->children[i], sizeof(SSF));
+    memcpy(children[i], tree->children+(i*8), sizeof(SSF));
     freessf(children[i]);
   }
-  memcp(children[child_num], child, sizeof(SSF));
+  memcpy(children[child_num], child, sizeof(SSF));
   freessf(child);
   children[child_num+1] = NULL;
-  return children;
+  return children[0];
 }
 
 
-SSF* read_tree(String node, SFF *tree) {
+SSF* read_tree(String node, SSF *tree) {
   if (!tree) {
     tree = malloc(sizeof(SSF));
     tree->name = strdup(node);
     tree->parent, tree->children = NULL;
-    tree->children_num = 0;
   }
   State *state = last_state(tree->name);
   tree->state = state->type;
@@ -101,9 +97,9 @@ SSF* read_tree(String node, SFF *tree) {
   int psize = 0;
   int csize = 0;
   int child_num = 0;
-  Val cols[] = { makeval(tbl[1], std_type),
-                 makeval(tbl[2], std_type) };
-  Result *res = sqlRead(tbl, cols, 2, 0, 0, 0);
+  Val cols[] = { makeval(columns[1], sdt_type),
+                 makeval(columns[2], sdt_type) };
+  Result *res = sqlRead(columns[0], cols, 2, 0, 0, 0);
   Row *row = res->table->row;
   for (int i = 0; i < res->table->size; i++) {
     if (!tree->parent && !strcmp(row->val[2], node)) {
@@ -118,7 +114,7 @@ SSF* read_tree(String node, SFF *tree) {
       child->name = strdup(row->val[2]);
       child->parent = tree;
       child->children = NULL;
-      append_child(tree, child);
+      append_child(tree, child, child_num);
       read_tree(child->name, child);
       child_num++;
     }
@@ -130,12 +126,12 @@ SSF* read_tree(String node, SFF *tree) {
 void add_branch(String node, String parent) {
   if (!validade(node, parent)) {
     error("givn ssf table unvalid");
-    return false;
+    return;
   }
   
   if (!valid_node(node)) {
-    Val vals[] = { makeval(node, ssf_type),
-                   makeval(parent, ssf_type) };
-    sqlInsert(tbl,vals, 2);
+    Val vals[] = { makeval(node, sdt_type),
+                   makeval(parent, sdt_type) };
+    sqlInsert(columns,vals, 2);
   }
 }

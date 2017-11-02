@@ -1,13 +1,12 @@
-#include <pivot.h>
-#define SSF
+#include "pivot.h"
 
-const String tbl[] = {"PIVOT_TBL", "PIVOT", "STATE"};
+String column[] = {"PIVOT_COLUMN", "PIVOT", "STATE"};
 
 void valid_pivot() {
-  if (notexists(PIVOT_TBL)) {
-    Val vals[] = { makeval(NULL, std_type),
-                   makeval(NULL, std_number) };
-    sqlCreate(tbl, vals, 2);
+  if (notexist(column[0])) {
+    Val vals[] = { makeval(NULL, sdt_type),
+                   makeval(NULL, sdt_number) };
+    sqlCreate(column[0], vals, 2);
   }
 }
 
@@ -19,7 +18,7 @@ void freepiv(Pivot *piv) {
 }
 
 int last_pivot_state(String pivot) {
-  Pivot *piv == get_pivot(pivot);
+  Pivot *piv = get_pivot(pivot);
   int state =  piv->stop_stamp?stop:start;
   freepiv(piv);
   return state;
@@ -27,9 +26,9 @@ int last_pivot_state(String pivot) {
 
 void start_pivot(String pivot) {
   del_pivot(pivot);
-  Val vals[] = { makeval(pivot, std_type),
-                 makeval(start, std_number) };
-  sqlInsert(tbl, vals, 2);
+  Val vals[] = { makeval(pivot, sdt_type),
+                 makeval(itos(start), sdt_number) };
+  sqlInsert(column, vals, 2);
 }
 
 void stop_pivot(String pivot) {
@@ -37,23 +36,24 @@ void stop_pivot(String pivot) {
     error("pivot already stopped");
     return;
   }
-  Val vals[] = { makeval(pivot, std_type),
-                 makeval(stop, std_number) };
-  sqlInsert(tbl, vals, 2);
+  Val vals[] = { makeval(pivot, sdt_type),
+                 makeval(itos(stop), sdt_number) };
+  sqlInsert(column, vals, 2);
 }
 
 void del_pivot(String piv) {
-  String clausse = cat(3, prependType(tbl[1], std_type), " = ",  piv);
-  deleteRecords(tbl[0], clause);
+  String clause = cat(3, prependType(column[1], sdt_type), " = ",  piv);
+  deleteRecords(column[0], clause);
 }
 
 Pivot* get_pivot(String pivot) {
-  Val cols[] = { makeval(tbl[1], std_type),,
-                 makeval(tbl[2], std_number) };
-  String pivot_clause = cat(3, prependType(tbl[1], std_type), "=", pivot);
-  Result *pivot_res = sqlRead(tbl[0], cols, 2, 2, 0, pivot_clause);
+  Val cols[] = { makeval(column[1], sdt_type),
+                 makeval(column[2], sdt_number) };
+  String pivot_clause = cat(3, prependType(column[1], sdt_type), "=", pivot);
+  Result *pivot_res = sqlRead(column[0], cols, 2, 2, 0, pivot_clause);
   handleRes(pivot_res);
   Row *row = pivot_res->table->row;
+  Pivot *piv = malloc(sizeof(Pivot));
   piv->start_stamp = ts2tm(row->val[1]);
   if (pivot_res->table->size == 1) {
     piv->stop_stamp = NULL;
@@ -68,10 +68,9 @@ Pivot* get_pivot(String pivot) {
 String* list_pivots(int *size) {
   *size = 0;
   String *pivots = NULL;
-  Val cols[] = { makeval(tbl[1], std_type) };
-  int groupby[] = {1];
-  String piv_clause = cat(3, prependType(tbl[2], std_number), " = ", itoa(start));
-  Result *res = sqlRead(tbl[0], cols, 1, 0, 0, piv_clause);
+  Val cols[] = { makeval(column[1], sdt_type) };
+  String piv_clause = cat(3, prependType(column[2], sdt_number), " = ", itos(start));
+  Result *res = sqlRead(column[0], cols, 1, 0, 0, piv_clause);
   handleRes(res);
   if (res->table->size<1)
     return NULL;
@@ -91,26 +90,25 @@ String* list_current_pivots(int *size) {
   for (int i = 0; i < *size; i++) {
     Pivot *piv = get_pivot(pivots[i]);
     if (!piv->stop_stamp)
-      pivots = append(pivots, piv->name, pcount++);
+      pivots = append(pivots, pcount++, piv->name);
     freepiv(piv);
   }
-  free_ptr(pivots);
+  des_ptr(pivots, *size);
   return open;
 }
 
 Cumulate* cumulate_pivot(Pivot *piv, int *size) {
-  if (!piv->stop_stamp) {
-    piv->stop_stamp = current_tm();
-  }
+  if (!piv->stop_stamp)
+    piv->stop_stamp = gmtime((time_t*)time(NULL));
   String *linkables = listlinkables(size);
-  Cumulate *cumulates = malloc(size*sizeof(Cumulate));
+  Cumulate *cumulates = malloc(*size*sizeof(Cumulate));
   float tota;
   int type;
-  for (int i = 0; i<size; i++) {
+  for (int i = 0; i<*size; i++) {
     tota = cumulate(linkables[i], piv->start_stamp, piv->stop_stamp, &type);
-    piv[i].name = strdup(linkables[i]);
-    piv[i].tota = tota;
-    piv[i].type = type;
+    cumulates[i].name = strdup(linkables[i]);
+    cumulates[i].tota = tota;
+    cumulates[i].type = type;
   }
   return cumulates;
 }
@@ -119,11 +117,10 @@ String cumulate_pivot_str(Pivot *piv) {
   String cumulatestr = NULL;
   int size;
   Cumulate *cumulates = cumulate_pivot(piv, &size);
-  String coef = cumulates[0]->type==start?"hours\n":"\n";
-  h
-  for (int i = 0; i<*size; i++) {
-    cumulatestr = cat(5, cumulatestr, cumulate[i].name, ": ", ftos(cumulate[i].tota), coef);
+  String coef = cumulates[0].type==start?"hours\n":"\n";
+  for (int i = 0; i<size; i++) {
+    cumulatestr = cat(5, cumulatestr, cumulates[i].name, ": ", ftos(cumulates[i].tota), coef);
+    free(cumulates+i*8);
   }
-  free(cumulates);
   return cumulatestr;
 }

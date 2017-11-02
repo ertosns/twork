@@ -3,14 +3,18 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/Xlib.h>
+#include <math.h>
 #include "atrack.h"
+
 #ifndef CRUD
 #include "crud.h"
 #endif
+
 #ifndef LINKABLES
 #include "linker.h"
 #endif
-#include <math.h>
+
+
 
 int old_x_root, old_y_root;
 

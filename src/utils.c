@@ -1,13 +1,15 @@
+#define _XOPEN_SOURCE
+#define _GNU_SOURCE
 #include <math.h>
-#include <dirent.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <assert.h>
-#include "clock.h"
 
+#ifndef CLOCK
+#include "clock.h"
+#endif
 
 char *dash = "-";
 char *colon = ":";
@@ -103,30 +105,26 @@ String removeColFlag(String name)
 String prependType(String name, int type)
 {
   String pre;
-  switch(type)
-    {
-    case sdt_type:
-      pre = "T_";
-      break;
-    case sdt_string:
-      pre = "S_";
-      break;
-    case sdt_blob:
-      pre = "B_";
-      break;
-    case sdt_date:
-      pre = "D_";
-      break;
-    case sdt_number:
-      pre = "N_";
-      break;
-    case sdt_double:
-      pre = "L_";
-      break;
-    default:
-      error(cat(2, "type not defined givin flag ", itos(type)));
-      exit(0);
-    }
+  switch(type) {
+  case sdt_type:
+    pre = "T_";
+    break;
+  case sdt_string:
+    pre = "S_";
+    break;
+  case sdt_date:
+    pre = "D_";
+    break;
+  case sdt_number:
+    pre = "N_";
+    break;
+  case sdt_double:
+    pre = "L_";
+    break;
+  default:
+    error(cat(2, "type not defined givin flag ", itos(type)));
+    exit(0);
+  }
   return cat(2, pre, name);
 }
 
@@ -138,8 +136,6 @@ int getDataType(String colName)
       return sdt_type;
     case 'S':
       return sdt_string;
-    case 'B':
-      return sdt_blob;
     case 'D':
       return sdt_date;
     case 'N':
@@ -157,11 +153,22 @@ String tm2localstr(struct tm *info) {
   return  tm2ts(localtime(&gmt));
 }
 
-tm* ts2tm(String ts) {
-  tm *tmfrag;
-  strptime(ts, SQL_DATE_FORMAT, &tmfrag);
-  time_t local = timegm(&tmfrag);
+bool within_tm(struct tm* test, struct tm* start, struct tm* stop) {
+  time_t tt = timegm(test);
+  if (tt>=timegm(start) && tt<=timegm(stop))
+    return true;
+  return false;
+}
+
+struct tm* ts2tm(String ts) {
+  struct tm *tmfrag;
+  strptime(ts, SQL_DATE_FORMAT, tmfrag);
+  time_t local = timegm(tmfrag);
   return localtime(&local);
+}
+struct tm* current_tm() {
+  time_t t = time(NULL);
+  return gmtime(&t);
 }
 
 String tm2ts(struct tm *info) {
