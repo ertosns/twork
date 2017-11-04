@@ -56,4 +56,4 @@ void des_tbl(Table *tbl);
 void des_row(Row *row, int size, int ncol);
 void des_err(Err *err);
 void des_val(Val *);
-void des_ptr(String * , int size);
+void des_strs(String *, int size);

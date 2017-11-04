@@ -268,7 +268,7 @@ int size;
   String *list = list_pivots(&size);
   for (int i = 0; i<size; i++)
     printf("(%d) %s\n",i, list[i]);
-  des_ptr(list, size);
+  des_strs(list, size);
   cmdinit();
 }
 ;
@@ -279,7 +279,7 @@ listopenpivs: LIST_OPEN_PIVS
   String *list = list_current_pivots(&size);
   for (int i = 0; i<size; i++)
     printf("(%d) %s\n",i, list[i]);
-  des_ptr(list, size);
+  des_strs(list, size);
   cmdinit();
 }
 ;
@@ -432,7 +432,7 @@ void init() {
   for (int i = 0; i < size; i++)
       printf("(%d) %s\n", i, pivs[i]);
   if (size>0)
-    des_ptr(pivs, size);
+    des_strs(pivs, size);
 }
 
 int main(int argc, char **argv)

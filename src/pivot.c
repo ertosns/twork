@@ -76,7 +76,7 @@ String* list_pivots(int *size) {
     return NULL;
   Row *row = res->table->row;
   do {
-    pivots = append(pivots, *size, row->val[2]);
+    append(pivots, *size, row->val[2]);
     (*size)++;
   } while (row = row->nxt);
   des_res(res);
@@ -90,10 +90,10 @@ String* list_current_pivots(int *size) {
   for (int i = 0; i < *size; i++) {
     Pivot *piv = get_pivot(pivots[i]);
     if (!piv->stop_stamp)
-      pivots = append(pivots, pcount++, piv->name);
+      append(open, pcount++, piv->name);
     freepiv(piv);
   }
-  des_ptr(pivots, *size);
+  des_strs(pivots, *size);
   return open;
 }
 
@@ -110,6 +110,7 @@ Cumulate* cumulate_pivot(Pivot *piv, int *size) {
     cumulates[i].tota = tota;
     cumulates[i].type = type;
   }
+  des_strs(linkables, *size);
   return cumulates;
 }
 

@@ -149,18 +149,17 @@ int notexist(String tablename)
 
 String getSqlDateType(int typeFlag)
 {
-  switch(typeFlag)
-    {
-    case sdt_date:      return "DATE";
-    case sdt_type:      return "VARCHAR(15)";
-    case sdt_string:    return "TEXT";
-    case sdt_number:    return "INTEGER";
-    case sdt_double:    return "REAL";
-    default: {
-      error("unkown SQL type flag");
-      return NULL;
-    }
-    }
+  switch(typeFlag) {
+  case sdt_date:      return "DATE";
+  case sdt_type:      return "VARCHAR(15)";
+  case sdt_string:    return "TEXT";
+  case sdt_number:    return "INTEGER";
+  case sdt_double:    return "REAL";
+  default: {
+    error("unkown SQL type flag");
+    return NULL;
+  }
+  }
 }
 
 Val *makevalptr(String strep, int valtype)
@@ -189,35 +188,33 @@ void exec(int command, KeyVal *keyval, String tname, String clause)
   Val *vals = malloc(keyval->size*sizeof(Val));
   keys[0] = tname;
   int count = 0;
-  while(keyval->size)
-    {
-      if (command == createcmd) {
-	vals[count].strep = keyval->key;
-	vals[count].valtype = keyval->val[0].valtype;
-      } else {
-	vals[count] = *keyval->val;
-	keys[count+1] = keyval->key;
-      }
-      count++;
-      if(keyval->size == 1) break;
-      keyval = keyval->parent;
+  while(keyval->size) {
+    if (command == createcmd) {
+      vals[count].strep = keyval->key;
+      vals[count].valtype = keyval->val[0].valtype;
+    } else {
+      vals[count] = *keyval->val;
+      keys[count+1] = keyval->key;
     }
-  switch(command)
-    {
-    case createcmd: {
-      sqlCreate(tname, vals, count);
-      break;
-    }
-    case insertcmd: {
-      sqlInsert(keys, vals, count);
-      break;
-    }
-    case updatecmd: {
-      sqlUpdate(keys, vals, clause);
-      break;
-    }
-    default: error("unvalid command!");
-    }
+    count++;
+    if(keyval->size == 1) break;
+    keyval = keyval->parent;
+  }
+  switch(command) {
+  case createcmd: {
+    sqlCreate(tname, vals, count);
+    break;
+  }
+  case insertcmd: {
+    sqlInsert(keys, vals, count);
+    break;
+  }
+  case updatecmd: {
+    sqlUpdate(keys, vals, clause);
+    break;
+  }
+  default: error("unvalid command!");
+  }
 }
 
 int validpasscode(String passcode)
@@ -434,7 +431,8 @@ Result *sqlprologue(int rc, String sql) {
     res->type=tableres;
     res->table = copyTable();
   }
-  des_ptr(&sql, 1); 
+  if(sql)
+    free(sql);
   return res;
 }
 
@@ -577,10 +575,12 @@ String colval(Result *res, String colname, int irow) {
   return row->val[c];
 }
 
-void des_val(Val *vals) {
-  //TODO fix this
-  if (vals);
-  // free(vals);
+void des_val(Val *val) {
+  if (val) {
+    if (val->strep)
+      free(val->strep);
+    free(val);
+  }
 }
 
 void des_err(Err *err) {
@@ -603,7 +603,7 @@ void des_row(Row *row, int size, int ncol) {
   if (row->nxt)
     des_row(row->nxt, --size, ncol);
   
-  des_ptr(row->val, ncol);
+  des_strs(row->val, ncol);
   free(row);
 }
 
@@ -632,13 +632,8 @@ void des_res(Result *res) {
   free(res);
 }
 
-void des_ptr(String *ptr, int size) {
-  if (!ptr)
-    return;
-  
-  if (size > 0)
-    for (int i = 0; i < size; i++) {
-      if (ptr[i])
-	free(ptr[i]);
-    } 
+void des_strs(String *ptr, int size) { 
+  for (int i = 0; i < size; i++)
+    if (ptr[i])
+      free(ptr[i]);
 }

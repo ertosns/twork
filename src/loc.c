@@ -115,29 +115,25 @@ int storecommits() {
     return SUCCESS;
   }
 
+  //TABLE IS CORRUPT
   hs = shash;
   int loc[2] = {0,0};
-  Result *ilocres;
   Result *oldhashres;
-  String oldhashnames[] = {LOC, COMMIT};
-  Val oldhashvals[] = { makeval(COMMIT, sdt_string) };
+  Val oldhashvals[1] = { makeval(COMMIT, sdt_string) };
   String oldhashclause;
   String ohash;
+  Val vals[4] = {NULL, NULL, makeval(itos(loc[0]), sdt_number), makeval(itos(loc[0]), sdt_number) };
   for (int r = 0; r < ncommits; r++) {
     // get prev hash for the same submodule hs->col
     // calc diff betweeh hs->hash, prev line.
-    //get old hash
-    //TODO (fix) create map between type, colname i.e commit, sdt_string cleaner, support future layers
+    // get old hash
     oldhashclause = cat(4, prependType(SUBMODULE, sdt_string), " = '", hs->col, "'");
-    oldhashres = sqlRead(LOC, oldhashvals, 1, 1, 1,
-                         oldhashclause);
+    oldhashres = sqlRead(LOC, oldhashvals, 1, 1, 1, oldhashclause);
     ohash = (oldhashres->table)?oldhashres->table->row->val[0]:NULL;
     //free(oldhashres);
     yieldloc(hs->col, ohash, hs->hash, &loc[0]);
-    Val vals[] = { makeval(hs->col, sdt_string),
-                   makeval(hs->hash, sdt_string),
-                   makeval(itos(loc[0]), sdt_number),
-                   makeval(itos(loc[1]), sdt_number) };
+    vals[2] = makeval(hs->col, sdt_string);
+    vals[3] = makeval(hs->hash, sdt_string);
     sqlInsert(colnames, vals, 4);
     //TODO why it fails?
     //free(ilocres);

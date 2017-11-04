@@ -27,7 +27,7 @@ bool validade(String node, String parent) {
       break;
     }
   }
-  des_ptr(linkables, size);
+  des_strs(linkables, size);
   freestate(state);
   return valid;
 }
@@ -84,6 +84,8 @@ SSF* append_child(SSF *tree, SSF *child, int child_num) {
 
 
 SSF* read_tree(String node, SSF *tree) {
+  if (!node)
+    return NULL;
   if (!tree) {
     tree = malloc(sizeof(SSF));
     tree->name = strdup(node);

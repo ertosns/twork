@@ -21,14 +21,15 @@ int initutils() {
 }
 
 String* append(String *array, int size, String record) {
-  String *res = malloc(size*sizeof(String));
+  String *res = malloc((size+1)*sizeof(String));
   for (int i = 0; i < size; i++) {
     res[i] = strdup(array[i]);
     free(array[i]);
   }
+  res[size] = strdup(record);
   if (array)
     free(array);
-  res[size] = strdup(record);
+  return res;
 }
 
 String cat (int ignore, ...)

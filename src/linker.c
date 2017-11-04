@@ -24,18 +24,20 @@ String read_open_task() {
     state = last_state(linkables[i]);
     if (state && state->type == start) {
       CUR_TASK = strdup(linkables[i]);
-      des_ptr(linkables, size);
+      des_strs(linkables, size);
       freestate(state);
       return CUR_TASK;
     }
     freestate(state);
   }
-  des_ptr(linkables, size);
+  des_strs(linkables, size);
   return NULL;
 }
 
 String read_cur_task() {
   String open = read_open_task();
+  if (!open)
+    return NULL;
   SSF *tree = read_tree(open, NULL);
   int child_num = 0;
   SSF *child = tree->children?tree->children:NULL;
@@ -56,24 +58,23 @@ String* listlinkables(int *size) {
     return NULL;
   }
   
-  String *linkable = NULL;
+  
   Val cols[] = { makeval(NAME_COL, sdt_type) };
   Result *res = sqlRead(LINKABLES, cols, 1, 0, 0, 0);
   *size = (res->table)?res->table->size:0;
   if (!*size)
     goto des;
-  
-  linkable = malloc(*size * sizeof(String));
+  String *linkables = malloc(*size*sizeof(String));
   Row *rw = res->table->row;
   for(int i = 0; i < *size ; i++) {
-    linkable[i] = strdup(rw->val[0]);
+    linkables[i] = strdup(rw->val[0]);
     rw = rw->nxt;
   }
 
  des:
   des_res(res);
   des_val(&cols[0]);
-  return linkable;
+  return linkables;
 }
 
 
@@ -84,7 +85,7 @@ int linkablexists(String name) {
     if (!strcmp(linkables[i], name))
       exists = 1;
   
-  des_ptr(linkables, size);
+  des_strs(linkables, size);
   return exists;
 }
 
