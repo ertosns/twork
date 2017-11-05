@@ -41,8 +41,9 @@ String read_cur_task() {
   SSF *tree = read_tree(open, NULL);
   int child_num = 0;
   SSF *child = tree->children?tree->children:NULL;
+  State *state;
   while (child) {
-    State *state = last_state(child->name);
+    state = last_state(child->name);
     if (state->type==start)
       open = strdup(child->name);
     freestate(state);
@@ -58,7 +59,6 @@ String* listlinkables(int *size) {
     return NULL;
   }
   
-  
   Val cols[] = { makeval(NAME_COL, sdt_type) };
   Result *res = sqlRead(LINKABLES, cols, 1, 0, 0, 0);
   *size = (res->table)?res->table->size:0;
@@ -73,7 +73,7 @@ String* listlinkables(int *size) {
 
  des:
   des_res(res);
-  des_val(&cols[0]);
+  free(cols[0].strep);
   return linkables;
 }
 
@@ -122,8 +122,8 @@ int addlinkable(String tablename) {
     Val dtcols[] = { makeval(NAME_COL, sdt_type),
 		     makeval(PUSH_ROW, sdt_number) } ;
     sqlCreate(DAILY_TERMINATED, dtcols, 2);
-    des_val(&lcols[0]);
-    des_val(&lcols[1]);
+    free(lcols[0].strep);
+    free(lcols[1].strep);
   }
   else if(linkablexists(tablename)) {
     error("givin table already exists in LINKABLES table");
@@ -133,7 +133,7 @@ int addlinkable(String tablename) {
   String names[] = {LINKABLES, NAME_COL};
   Val val[] = { makeval(tablename, sdt_type) };
   int rc = sqlInsert(names, val, 1);
-  des_val(&val[0]);
+  free(val[0].strep);
   return rc;
 }
 

@@ -97,7 +97,13 @@ String prependType(String name, int type);
 String removeColFlag(String name);
 int getDataType(String name);
 String tm2localstr(struct tm *info);
-bool within_tm(struct tm*, struct tm*, struct tm*);
+/*
+return values:
+ -1 before
+  0 between inclusive
+  1 after
+*/
+int within_tm(struct tm*, struct tm*start, struct tm*stop);
 struct tm* ts2tm(String ts);
 struct tm* current_tm();
 String tm2ts(struct tm *info);

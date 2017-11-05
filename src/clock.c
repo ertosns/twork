@@ -144,20 +144,20 @@ int validstate(String ctable, int st) {
 void freestate(State *state) {
   if (!state)
     return;
-  if (state->date && state->type!=none)
-    free(state->date);
+  if (state->date && state->type!=none);
+    //free(state->date);
   free(state);
 }
 
-void tableres2states(Table *table, State *states)
+void tableres2states(Table *table, State **states)
 {
   Row *rw = table->row;
   for(int r = 0; r < table->size && rw; r++) {
-    states[r].rowid = atoi(rw->val[0]);
-    states[r].date = malloc(sizeof(struct tm));
-    strptime(rw->val[1], SQL_DATE_FORMAT, states[r].date);
-    states[r].val = strtold(rw->val[2], NULL);
-    states[r].type = atoi(rw->val[3]);
+    states[r]->rowid = atoi(rw->val[0]);
+    states[r]->date = malloc(sizeof(struct tm));
+    strptime(rw->val[1], SQL_DATE_FORMAT, states[r]->date);
+    states[r]->val = strtold(rw->val[2], NULL);
+    states[r]->type = atoi(rw->val[3]);
     rw = rw->nxt;
   }
 }
@@ -238,56 +238,68 @@ State *zerostate() {
   return state;
 }
 
-State *state(String ctable, int *size) {
-  Result *res = sqlRead(ctable, 0, 0, 1, 1, 0);
+State **state(String ctable, int *size) {
+  Result *res = sqlReadFull(ctable);
   if (res->type == errorres || !res->table) {
     *size = 0;
-    return zerostate();
+    return NULL;
   }
   handleRes(res);
-  State *states = malloc(res->table->size*sizeof(State));
+  State **states = malloc(res->table->size*sizeof(State*));
+  for (int i = 0; i < res->table->size; i++)
+    states[i] = malloc(sizeof(State));
   tableres2states(res->table, states);
   *size = res->table->size;
-  free(res);
+  des_res(res);
   return states;
 }
 
 State* last_state(String ctable) {
   int size;
-  State *states =  state(ctable, &size);
+  State **states =  state(ctable, &size);
   for (int i = 0; i < size-1; i++)
-    freestate(states+i*8);
-  return states+((size-1)*8);
+    freestate(states[i]);
+  return (size)?states[size-1]:zerostate();
 }
 
 
 float cumulate (String ctable, struct tm *start_stamp, struct tm *stop_stamp, int *type) {
   float tota = 0;
   int size;
-  struct tm* task_start_stamp = NULL;
-  State *states = state(ctable, &size);
-  switch (states[0].type) {
+  struct tm task_start_stamp;
+  State **states = state(ctable, &size);
+  switch (states[0]->type) {
   case start:
   case stop:
     *type = start;
+    break;
   case event:
     *type = event;
+    break;
   default:
     error("unexpected state type");
     return tota;
   }
-  State state;
+  State *state = NULL;
+  int chorn;
   for (int i = 0; i <size; i++) {
+    freestate(state);
     state = states[i];
-    if (within_tm(state.date, start_stamp, stop_stamp)) {
-      if (state.type == stop && task_start_stamp)
-        tota+=difftime((time_t)timegm(task_start_stamp), (time_t)timegm(state.date));
-      else if (state.type == stop)
-        task_start_stamp = state.date;
-      else if (state.type == event)
+    chorn = within_tm(state->date, start_stamp, stop_stamp);
+    if (chorn>0)
+      break;
+    else if (chorn<0)
+      continue;
+    else {
+      if (state->type == stop)
+        tota+=difftime(timegm(state->date), timegm(&task_start_stamp));
+      else if (state->type == start)
+        task_start_stamp = *state->date;
+      else if (state->type == event)
         tota++;
     }
   }
+  freestate(state);
   return tota;
 }
 

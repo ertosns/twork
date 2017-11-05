@@ -8,8 +8,6 @@
 #include "clock.h"
 #endif
 
-
-
 /*
   - SSF is a forest not a tree, or start/stop kind of table
   - each node has a unique name of valid clocked table name under linkables.
@@ -18,8 +16,7 @@
   - if node is active, then it's parent is active.
   - results: 
     - time spend in node >+ total time spend on it's nodes.
-    - only one leaf is active at a time.
-  
+    - only one leaf is active at a time.  
 
   SSF_TABLE 
   ||timestamp||node_name||parent_name||state||

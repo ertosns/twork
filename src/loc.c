@@ -31,10 +31,9 @@ int initloc() {
   GIT_LOG = cat(5,"cd ", DEV_PATH, ";git submodule foreach git log --author ",AUTHOR, " -n 1");
   GIT_DIFF = cat(3, "cd ", DEV_PATH, ";git submodule foreach git diff --numstat ");
   GIT_ADD = cat(3, "cd ", DEV_PATH, ";git submodule foreach git add --all");
-  GIT_COMMIT = cat(5, "cd ", DEV_PATH, ";git submodule foreach git commit -m\"",DEFAULT_MSG, "\"");
+  GIT_COMMIT = cat(5, "cd ", DEV_PATH, ";git submodule foreach git commit -m\"", DEFAULT_MSG, "\"");
   GIT_PUSH = cat(3, "cd ", DEV_PATH, ";git submodule foreach git push");
 
-  
   State *ls = last_state(LOC);
   if (ls->type==none || (int)difftime(time(NULL), timegm(ls->date))>=COMMIT_SHRESHOLD)
     return loc(NULL);
@@ -76,10 +75,10 @@ int storecommits() {
   //TODO (res) initializing type name[size] return object may not be initialized?!
   String colnames[] = {LOC, SUBMODULE, COMMIT, POSE, NEGE};
   if(notexist(LOC)) {
-    Val vals[] = {makeval(SUBMODULE, sdt_string),
-                  makeval(COMMIT, sdt_string),
-                  makeval(POSE, sdt_number),
-                  makeval(NEGE, sdt_number)};
+    Val vals[] = { makeval(SUBMODULE, sdt_string),
+                   makeval(COMMIT, sdt_string),
+                   makeval(POSE, sdt_number),
+                   makeval(NEGE, sdt_number)};
     sqlCreate(LOC, vals, LOC_COL_SIZE);
   }
   FILE *commits = popen(GIT_LOG, "r");
@@ -122,7 +121,9 @@ int storecommits() {
   Val oldhashvals[1] = { makeval(COMMIT, sdt_string) };
   String oldhashclause;
   String ohash;
-  Val vals[4] = {NULL, NULL, makeval(itos(loc[0]), sdt_number), makeval(itos(loc[0]), sdt_number) };
+  Val vals[4];
+  vals[2] = makeval(itos(loc[0]), sdt_number);
+  vals[3] = makeval(itos(loc[0]), sdt_number);
   for (int r = 0; r < ncommits; r++) {
     // get prev hash for the same submodule hs->col
     // calc diff betweeh hs->hash, prev line.
@@ -132,8 +133,8 @@ int storecommits() {
     ohash = (oldhashres->table)?oldhashres->table->row->val[0]:NULL;
     //free(oldhashres);
     yieldloc(hs->col, ohash, hs->hash, &loc[0]);
-    vals[2] = makeval(hs->col, sdt_string);
-    vals[3] = makeval(hs->hash, sdt_string);
+    vals[0] = makeval(hs->col, sdt_string);
+    vals[1] = makeval(hs->hash, sdt_string);
     sqlInsert(colnames, vals, 4);
     //TODO why it fails?
     //free(ilocres);

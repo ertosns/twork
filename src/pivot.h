@@ -41,5 +41,5 @@ Pivot* get_pivot(String);
 String* list_pivots(int *);
 String* list_current_pivots(int*);
 void freepiv(Pivot*);
-Cumulate* cumulate_pivot(Pivot *piv, int *size);
+Cumulate **cumulate_pivot(Pivot *piv, int *size);
 String cumulate_pivot_str(Pivot *piv);

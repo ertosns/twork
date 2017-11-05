@@ -1,11 +1,11 @@
 #include "pivot.h"
 
-String column[] = {"PIVOT_COLUMN", "PIVOT", "STATE"};
+String column[] = {"PIVOT", "PIVOT_NAME", "STATE"};
 
 void valid_pivot() {
   if (notexist(column[0])) {
-    Val vals[] = { makeval(NULL, sdt_type),
-                   makeval(NULL, sdt_number) };
+    Val vals[] = { makeval(column[1], sdt_type),
+                   makeval(column[2], sdt_number) };
     sqlCreate(column[0], vals, 2);
   }
 }
@@ -42,18 +42,20 @@ void stop_pivot(String pivot) {
 }
 
 void del_pivot(String piv) {
-  String clause = cat(3, prependType(column[1], sdt_type), " = ",  piv);
+  valid_pivot();
+  String clause = cat(4, prependType(column[1], sdt_type), " = '",  piv, "'");
   deleteRecords(column[0], clause);
 }
 
 Pivot* get_pivot(String pivot) {
-  Val cols[] = { makeval(column[1], sdt_type),
-                 makeval(column[2], sdt_number) };
-  String pivot_clause = cat(3, prependType(column[1], sdt_type), "=", pivot);
-  Result *pivot_res = sqlRead(column[0], cols, 2, 2, 0, pivot_clause);
+  String pivot_clause = cat(4, prependType(column[1], sdt_type), "='", pivot, "'");
+  Result *pivot_res = sqlRead(column[0], 0, 0, 2, 0, pivot_clause);
   handleRes(pivot_res);
+  if (!pivot_res->table->size)
+    return NULL;
   Row *row = pivot_res->table->row;
   Pivot *piv = malloc(sizeof(Pivot));
+  piv->name = strdup(pivot);
   piv->start_stamp = ts2tm(row->val[1]);
   if (pivot_res->table->size == 1) {
     piv->stop_stamp = NULL;
@@ -66,19 +68,21 @@ Pivot* get_pivot(String pivot) {
 }
 
 String* list_pivots(int *size) {
+  valid_pivot();
   *size = 0;
   String *pivots = NULL;
-  Val cols[] = { makeval(column[1], sdt_type) };
-  String piv_clause = cat(3, prependType(column[2], sdt_number), " = ", itos(start));
+  Val cols[] = {makeval(column[1], sdt_type)};
+  String piv_clause = cat(4, prependType(column[2], sdt_number), " = '", itos(start), "'");
   Result *res = sqlRead(column[0], cols, 1, 0, 0, piv_clause);
   handleRes(res);
-  if (res->table->size<1)
+  if (!res->table || res->table->size<1)
     return NULL;
   Row *row = res->table->row;
-  do {
-    append(pivots, *size, row->val[2]);
+  for (int i = 0; i < res->table->size; i++) {
+    pivots = append(pivots, *size, row->val[0]);
+    row = row->nxt;
     (*size)++;
-  } while (row = row->nxt);
+  }
   des_res(res);
   return pivots;
 }
@@ -87,28 +91,31 @@ String* list_current_pivots(int *size) {
   String *open = NULL;
   int pcount = 0;
   String *pivots = list_pivots(size);
+  Pivot *piv;
   for (int i = 0; i < *size; i++) {
-    Pivot *piv = get_pivot(pivots[i]);
+    piv = get_pivot(pivots[i]);
     if (!piv->stop_stamp)
-      append(open, pcount++, piv->name);
+      open = append(open, pcount++, piv->name);
     freepiv(piv);
   }
   des_strs(pivots, *size);
   return open;
 }
 
-Cumulate* cumulate_pivot(Pivot *piv, int *size) {
+Cumulate** cumulate_pivot(Pivot *piv, int *size) {
   if (!piv->stop_stamp)
-    piv->stop_stamp = gmtime((time_t*)time(NULL));
+    piv->stop_stamp = current_tm();
   String *linkables = listlinkables(size);
-  Cumulate *cumulates = malloc(*size*sizeof(Cumulate));
+  Cumulate **cumulates = malloc(*size*sizeof(Cumulate*));
+  for (int i = 0; i < *size; i++)
+    cumulates[i] = malloc(sizeof(Cumulate));
   float tota;
   int type;
   for (int i = 0; i<*size; i++) {
     tota = cumulate(linkables[i], piv->start_stamp, piv->stop_stamp, &type);
-    cumulates[i].name = strdup(linkables[i]);
-    cumulates[i].tota = tota;
-    cumulates[i].type = type;
+    cumulates[i]->name = strdup(linkables[i]);
+    cumulates[i]->tota = tota;
+    cumulates[i]->type = type;
   }
   des_strs(linkables, *size);
   return cumulates;
@@ -117,11 +124,11 @@ Cumulate* cumulate_pivot(Pivot *piv, int *size) {
 String cumulate_pivot_str(Pivot *piv) {
   String cumulatestr = NULL;
   int size;
-  Cumulate *cumulates = cumulate_pivot(piv, &size);
-  String coef = cumulates[0].type==start?"hours\n":"\n";
+  Cumulate **cumulates = cumulate_pivot(piv, &size);
+  String coef = cumulates[0]->type==start?"hours\n":"\n";
   for (int i = 0; i<size; i++) {
-    cumulatestr = cat(5, cumulatestr, cumulates[i].name, ": ", ftos(cumulates[i].tota), coef);
-    free(cumulates+i*8);
+    cumulatestr = cat(5, cumulatestr, cumulates[i]->name, ": ", ftos(cumulates[i]->tota/3600), coef);
+    free(cumulates[i]);
   }
   return cumulatestr;
 }

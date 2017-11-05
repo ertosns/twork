@@ -67,7 +67,7 @@ int startst(String ctable);
 int stopst(String ctable);
 /* for VALUED-CUMULATED TABLE */
 int eventst(String ctable, String dval);
-State *state(String ctable, int *size);
+State **state(String ctable, int *size);
 /* view last state */
 State* last_state(String);
 /*

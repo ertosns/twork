@@ -26,7 +26,7 @@ String* append(String *array, int size, String record) {
     res[i] = strdup(array[i]);
     free(array[i]);
   }
-  res[size] = strdup(record);
+  res[size] = strdup(record?record:"");
   if (array)
     free(array);
   return res;
@@ -154,22 +154,32 @@ String tm2localstr(struct tm *info) {
   return  tm2ts(localtime(&gmt));
 }
 
-bool within_tm(struct tm* test, struct tm* start, struct tm* stop) {
+int within_tm(struct tm* test, struct tm* start, struct tm* stop) {
   time_t tt = timegm(test);
-  if (tt>=timegm(start) && tt<=timegm(stop))
-    return true;
-  return false;
+  if (tt<timegm(start))
+    return -1;
+  else if (tt>timegm(stop))
+    return 1;
+  return 0;
+}
+
+struct tm *duptm(struct tm *tmp) {
+  struct tm *tmp2 = malloc(sizeof (struct tm));
+  memcpy(tmp2, tmp, sizeof(struct tm));
+  return tmp2;
 }
 
 struct tm* ts2tm(String ts) {
-  struct tm *tmfrag;
-  strptime(ts, SQL_DATE_FORMAT, tmfrag);
-  time_t local = timegm(tmfrag);
-  return localtime(&local);
+  struct tm tmfrag;
+  strptime(ts, SQL_DATE_FORMAT, &tmfrag);
+  time_t local = timegm(&tmfrag);
+  struct tm* tmp = localtime(&local); //return static data
+  return duptm(tmp);
 }
 struct tm* current_tm() {
   time_t t = time(NULL);
-  return gmtime(&t);
+  struct tm *tmp =  gmtime(&t);
+  return duptm(tmp);
 }
 
 String tm2ts(struct tm *info) {

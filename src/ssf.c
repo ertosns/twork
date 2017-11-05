@@ -37,7 +37,7 @@ bool valid_node(String ssf) {
   Result *res = sqlRead(columns[0], cols, 1, 0, 0, 0);
   Row *row = res->table->row;
   for (int i = 0; i < res->table->size; i++) {
-    if (!strcmp(ssf, row->val[3])) {
+    if (!strcmp(ssf, row->val[0])) {
       des_res(res);
       return false;
     }
@@ -48,25 +48,28 @@ bool valid_node(String ssf) {
 }
 
 void break_branch(String node, String parent) {
-  String clause = cat(7, prependType(columns[1], sdt_type), " = ", node, " and ", prependType(columns[2], sdt_type), " = ", parent);
+  String clause = cat(8, prependType(columns[1], sdt_type), " = '", node, "' and ", prependType(columns[2], sdt_type), " = '", parent, "'");
   deleteRecords(columns[0], clause);
 }
 
 void break_leaf(String node) {
-  String clause = cat(3, prependType(columns[1], sdt_type), " = ", node);
+  String clause = cat(4, prependType(columns[1], sdt_type), " = '", node, "'");
   deleteRecords(columns[0], clause);
 }
   
 
 void freessf(SSF *node) {
+  if(!node)
+    return;
   if (node->parent)
-    free(node->parent);
+    freessf(node->parent);
   int child_num = 0;
   SSF *child = node->children?node->children:NULL;
   while (child) {
     freessf(child);
     child = node->children+(child_num++*8); //null-terminated
   }
+  free(node->name);
   free(node);
 }
 //append child to null-terminated list.
@@ -89,7 +92,7 @@ SSF* read_tree(String node, SSF *tree) {
   if (!tree) {
     tree = malloc(sizeof(SSF));
     tree->name = strdup(node);
-    tree->parent, tree->children = NULL;
+    tree->parent = NULL, tree->children = NULL;
   }
   State *state = last_state(tree->name);
   tree->state = state->type;
@@ -102,18 +105,19 @@ SSF* read_tree(String node, SSF *tree) {
   Val cols[] = { makeval(columns[1], sdt_type),
                  makeval(columns[2], sdt_type) };
   Result *res = sqlRead(columns[0], cols, 2, 0, 0, 0);
+  handleRes(res);
   Row *row = res->table->row;
   for (int i = 0; i < res->table->size; i++) {
-    if (!tree->parent && !strcmp(row->val[2], node)) {
+    if (!tree->parent && !strcmp(row->val[0], node)) {
       tree->parent = malloc(sizeof(SSF));
-      tree->parent->name = strdup(row->val[3]);
+      tree->parent->name = strdup(row->val[1]);
       tree->parent->parent = NULL;
       tree->parent->children = tree;
       read_tree(tree->parent->name, tree->parent);
     }
-    else if (!strcmp(row->val[3], node)) {
+    else if (!strcmp(row->val[1], node)) {
       SSF *child = malloc(sizeof(SSF));
-      child->name = strdup(row->val[2]);
+      child->name = strdup(row->val[0]);
       child->parent = tree;
       child->children = NULL;
       append_child(tree, child, child_num);

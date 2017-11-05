@@ -57,8 +57,6 @@ void handleRes(Result *res)
     error(cat(4, "commxand:\n", res->err->command,  "\nerror:\n", res->err->err));
     exit(1);
   }
-  else if (res->type == errorres)
-    des_err(res->err);
 }
 
 
@@ -177,9 +175,7 @@ Val *makevalptr(String strep, int valtype)
 
 Val makeval(String strep, int valtype) {
   Val *ptr = makevalptr(strep, valtype);
-  Val val = *ptr;
-  des_val(ptr);
-  return val;
+  return *ptr;
 }
 
 void exec(int command, KeyVal *keyval, String tname, String clause)
@@ -289,15 +285,23 @@ Result *sqlReadFull(String name) {
   return sqlReadGrouped(name, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
+Result *nullres() {
+  Result *res  = malloc(sizeof(Result));
+  res->type = errorres;
+  res->err = malloc(sizeof(Err));
+  res->err->command = NULL;
+  res->err->err = NULL;
+  return res;
+}
+
 Result *sqlRead(String name, Val cols[], int size, int limit, int asc, String clause) {
   return sqlReadGrouped(name, cols, size, 0, 0, 0, limit, asc, clause);
 }
 
 Result *sqlReadGrouped(String name, Val cols[], int size, int groupby, int group[], String having, int limit, int asc, String clause)
 {
-  Result *nullRes = &(Result) {errorres, .err=&(Err){FAILED}};
   if(notexist(name)) {
-    return nullRes;
+    return nullres();
   }
   String sql = "select ";
   if(!size)
@@ -584,16 +588,15 @@ void des_val(Val *val) {
 }
 
 void des_err(Err *err) {
-  //TODO fix
-  /*  if (!err)
-      return;
+  if (!err)
+    return;
       
-      if(err->command)
-      free(err->command);
-      if(err->err)
-      free(err->err);
-      
-      free(err);*/
+  if(err->command)
+    free(err->command);
+  if(err->err)
+    free(err->err);
+  
+  free(err);
 }
 
 void des_row(Row *row, int size, int ncol) {
