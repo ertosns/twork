@@ -35,19 +35,16 @@ String read_open_task() {
 }
 
 String read_cur_task() {
+  State *state;
   String open = read_open_task();
   if (!open)
     return NULL;
   SSF *tree = read_tree(open, NULL);
-  int child_num = 0;
-  SSF *child = tree->children?tree->children:NULL;
-  State *state;
-  while (child) {
-    state = last_state(child->name);
+  for (int i = 0; tree->children && tree->children[i]; i++) {
+    state = last_state(tree->children[i]->name);
     if (state->type==start)
-      open = strdup(child->name);
+      open = strdup(tree->children[i]->name);
     freestate(state);
-    child = tree->children+(child_num++*8);
   }
   freessf(tree);
   return open;

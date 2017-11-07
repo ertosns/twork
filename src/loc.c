@@ -48,7 +48,6 @@ struct HASH {
 } hashes;
 struct HASH *shash = &hashes;
 
-//TODO (fix) replace strings with global variables for better styleing
 //TODO handle NULL ohash
 void yieldloc (String colname, String ohash, String nhash, int *locyield) {
   FILE *diff = popen(cat(5, GIT_DIFF, ohash?ohash:"", " ", nhash, " 2>/dev/null "), "r");
@@ -61,18 +60,15 @@ void yieldloc (String colname, String ohash, String nhash, int *locyield) {
       continue;
     yield = strtok(line, "\t");
     pos += atoi(yield);
-    yield = strtok(line, "\t");
+    yield = strtok(NULL, "\t");
     neg += atoi(yield);
   }
   locyield[0] = pos;
   locyield[1] = neg;
 }
 
-//TODO (fix) dailyterminated instead of expanding columns, expand rows, and read per column/row value instead of column value.
-/*store last commits hashes in PATH submodule*/
 int storecommits() {
   struct HASH *hs = &hashes;
-  //TODO (res) initializing type name[size] return object may not be initialized?!
   String colnames[] = {LOC, SUBMODULE, COMMIT, POSE, NEGE};
   if(notexist(LOC)) {
     Val vals[] = { makeval(SUBMODULE, sdt_string),
@@ -114,9 +110,8 @@ int storecommits() {
     return SUCCESS;
   }
 
-  //TABLE IS CORRUPT
   hs = shash;
-  int loc[2] = {0,0};
+  int loc[2];
   Result *oldhashres;
   Val oldhashvals[1] = { makeval(COMMIT, sdt_string) };
   String oldhashclause;

@@ -91,7 +91,7 @@ String itos(int integer)
 String ftos(long double f)
 {//TODO fix
   String buf = malloc(8*sizeof(char));
-  sprintf(buf, "%LF", f);
+  sprintf(buf, "%5.1LF", f);
   return buf;
 }
 

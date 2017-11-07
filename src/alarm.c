@@ -59,7 +59,7 @@ void localalert () {
 
 char *hostname() {
   // map hardcoded mac to it's ip addr.
-  return "192.168.2.100";
+  return "192.168.2.101";
 }
 
 void lights_flag(int type) {

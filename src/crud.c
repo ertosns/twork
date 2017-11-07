@@ -14,6 +14,9 @@ String DEV_DB = "file:/tmp/twork/twork.db";
 Table *copyTable();
 Result *sqlprologue(int, String);
 String ROWID = "ROWID";
+String start_str = "start";
+String stop_str = "stop";
+String event_str = "event";
 
 int initcrud() {
   USR_DB = cat(3, "file:", TWORK_PROF , "/twork.db");
@@ -59,7 +62,6 @@ void handleRes(Result *res)
   }
 }
 
-
 void viewTable()
 {
   if (!table)
@@ -74,26 +76,24 @@ void viewTable()
     for (int j = 0; j < table->ncol; j++) {
       if ((table->coltype[j] == sdt_date)) {
         strptime(rw->val[j], SQL_DATE_FORMAT, &tmfrag);
-        local = timegm(&tmfrag);
-        val = tm2ts(localtime(&local));
-        //TODO, how to check if dynamically allocated?
-        if (val[strlen(val)-1] == '\n')
-          val[strlen(val)-1] = '\0';
-      
+        val = tm2ts(&tmfrag);         
         printf("%s%s", val, "|");
         free(val);
       }
       else {
-        if (itemcnt%4==0) {
+        if (itemcnt%4==0 && table->ncol==4 && (
+            !strcmp(rw->val[j], "5") ||
+            !strcmp(rw->val[j], "6") ||
+            !strcmp(rw->val[j], "0"))) {
           if (!strcmp(rw->val[j], "5"))
-            val = strdup("start");
+            val = start_str;
           else if (!strcmp(rw->val[j], "6"))
-            val = strdup("stop");
+            val = stop_str;
           else if (!strcmp(rw->val[j], "0"))
-            val = strdup("event");
+            val = event_str;
         }
-        else 
-          val = rw->val[j]?rw->val[j]:strdup("");
+        else
+          val = rw->val[j]?rw->val[j]:"";
         printf("%s%s", val, "|");
       }
       itemcnt++;
@@ -101,6 +101,7 @@ void viewTable()
     printf("\n");
     rw = rw->nxt;
   }
+  des_tbl(table);
 }
 
 int readTable(void *pt, int argc, char **argv, char **colName)
@@ -219,19 +220,20 @@ int validpasscode(String passcode)
 
 
 Table *copyTable () {
-  if(!table) return NULL;
 
   Table *tbl = malloc(sizeof(Table));
-  tbl->size = table->size;
-  tbl->ncol = table->ncol;
-  tbl->coltype = malloc(table->ncol*sizeof(int));
-  tbl->colname = malloc(table->ncol*sizeof(String));
-
+  tbl->size = table?table->size:0;
+  tbl->ncol = table?table->ncol:0;
+  tbl->coltype = table?malloc(table->ncol*sizeof(int)):NULL;
+  tbl->colname = table?malloc(table->ncol*sizeof(String)):NULL;
+  if (!tbl->size)
+    return tbl;
+  
   for(int i = 0; i < table->ncol; i++) {
     tbl->colname[i] = strdup(table->colname[i]);
     tbl->coltype[i] = table->coltype[i];
   }
-
+  
   table->current = table->row;
   tbl->row = malloc(sizeof(Row));
   tbl->current = tbl->row;

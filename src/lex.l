@@ -46,8 +46,8 @@ extern void cmdinit();
 
 
 "--start-branch" return BRANCH_START;
-"--break_branch" return BRANCH_BREAK;
-"--break_leaf"   return BREAK_LEAF;
+"--break-branch" return BRANCH_BREAK;
+"--break-leaf"   return BREAK_LEAF;
 "--start-piv" return PIV_START;
 "-pivot" return PIVOT;
 "--del-piv" return PIV_DEL;

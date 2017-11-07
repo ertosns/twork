@@ -4,6 +4,10 @@
 
 
 String ROWID;
+String start_str;
+String stop_str;
+String event_str;
+
 int initcrud();
 /* check givin rc and return error with according
   error message if found */

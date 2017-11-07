@@ -51,7 +51,7 @@ Pivot* get_pivot(String pivot) {
   String pivot_clause = cat(4, prependType(column[1], sdt_type), "='", pivot, "'");
   Result *pivot_res = sqlRead(column[0], 0, 0, 2, 0, pivot_clause);
   handleRes(pivot_res);
-  if (!pivot_res->table->size)
+  if (!pivot_res->table || !pivot_res->table->size)
     return NULL;
   Row *row = pivot_res->table->row;
   Pivot *piv = malloc(sizeof(Pivot));

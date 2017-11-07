@@ -26,7 +26,7 @@
 typedef struct SSF
 {
   struct SSF* parent;
-  struct SSF* children; /*null terminated*/
+  struct SSF** children; /*null terminated*/
   String name;
   int state;
 } SSF;

@@ -111,25 +111,25 @@ int validstate(String ctable, int st) {
   switch(laststate->type) {
   case none:
     if (!(st == start || st == event)) {
-      error(cat(2, "empty table expecting start|event but gets ", strstate(st)));
+      //error(cat(2, "empty table expecting start|event but gets ", strstate(st)));
       return 0;
     }
     break;
   case start:
     if (st != stop && st != undo) {
-      error(cat(2, "start state expecting stop but gets ", strstate(st)));
+      //error(cat(2, "start state expecting stop but gets ", strstate(st)));
       return 0;
     }
     break;
   case stop:
     if (st != start && st != undo) {
-      error(cat(2, "stop state expecting start but gets ", strstate(st)));
+      //error(cat(2, "stop state expecting start but gets ", strstate(st)));
       return 0;
     }
     break;
   case event:
     if (st != event) {
-      error(cat(2, "event expecting event but gets ", strstate(st)));
+      //error(cat(2, "event expecting event but gets ", strstate(st)));
       return 0;
     }
     break;
@@ -204,19 +204,15 @@ int stopst(String ctable) {
   SSF *tree;
   if(notexist(ctable)) {
     return none;
-  } else { /*stop the ssf children hierarchy */
-    tree = read_tree(ctable, NULL);
-    child = tree->children?tree->children+(child_num++):NULL;
-    while (child) {
-      assert(!notexist(child->name));
-      stopst(child->name);
-      child = child->children+(child_num++*8);
-    }
-    freessf(tree);
   }
-  if (validstate(ctable, stop))
-    return insertts(ctable, 0, stop);
-  else error("unvalid state");
+  if (validstate(ctable, stop)) {
+    insertts(ctable, 0, stop);
+    tree = read_tree(ctable, NULL);
+    while (tree->children && (child = tree->children[child_num++]))
+      stopst(child->name);
+    freessf(tree);
+    return SUCCESS;
+  }
   return FAILED;
 }
 
@@ -227,7 +223,6 @@ int eventst(String ctable, String dval) {
     return insertts(ctable, dval, event);
   return FAILED;
 }
-
 
 State *zerostate() {
   State *state = malloc(sizeof(State));
@@ -262,36 +257,23 @@ State* last_state(String ctable) {
   return (size)?states[size-1]:zerostate();
 }
 
-
 float cumulate (String ctable, struct tm *start_stamp, struct tm *stop_stamp, int *type) {
   float tota = 0;
   int size;
-  struct tm task_start_stamp;
   State **states = state(ctable, &size);
-  switch (states[0]->type) {
-  case start:
-  case stop:
-    *type = start;
-    break;
-  case event:
-    *type = event;
-    break;
-  default:
-    error("unexpected state type");
-    return tota;
-  }
-  State *state = NULL;
-  int chorn;
+  State *state = NULL;   
+  *type = (states[0]->type == event)?event:start;
+  struct tm task_start_stamp = (struct tm) {-1};
   for (int i = 0; i <size; i++) {
     freestate(state);
     state = states[i];
-    chorn = within_tm(state->date, start_stamp, stop_stamp);
-    if (chorn>0)
+    switch (within_tm(state->date, start_stamp, stop_stamp)) {
+    case 1: //after
+      goto des;
+    case -1: //before
       break;
-    else if (chorn<0)
-      continue;
-    else {
-      if (state->type == stop)
+    case 0: 
+      if (state->type == stop && task_start_stamp.tm_sec != -1)
         tota+=difftime(timegm(state->date), timegm(&task_start_stamp));
       else if (state->type == start)
         task_start_stamp = *state->date;
@@ -299,6 +281,7 @@ float cumulate (String ctable, struct tm *start_stamp, struct tm *stop_stamp, in
         tota++;
     }
   }
+ des:
   freestate(state);
   return tota;
 }
