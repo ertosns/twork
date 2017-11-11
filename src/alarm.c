@@ -57,26 +57,32 @@ void localalert () {
   pclose(pip);
 }
 
+//TODO read mac from configuration file, 
 char *hostname() {
-  // map hardcoded mac to it's ip addr.
-  return "192.168.2.101";
+  if (!IP) {
+    /*resolve MAC, update IP from arp*/ 
+  }
+  return IP;
 }
 
 void lights_flag(int type) {
   int sockfd, err;
   char buffer[1];
   sprintf(&buffer[0], "%d", type);
-  struct hostent *server = gethostbyname(hostname());
-  struct sockaddr_in *saddr = malloc(sizeof(struct sockaddr_in));
-  saddr->sin_family = AF_INET;
-  saddr->sin_port = htons(port);
-  memcpy((void*) &saddr->sin_addr.s_addr, (void*) server->h_addr, server->h_length);
-  if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    error("socked connection failed");
-    return;
-  }
-  if ((err = connect(sockfd, (struct sockaddr*) saddr, sizeof(struct sockaddr_in))) < 0) printf("connection failed, errno %d, message %s, is ECONNREFUSED %d\n", errno, strerror(errno), errno==ECONNREFUSED);
-  else write(sockfd, (const void*) &buffer, 1);
+  struct hostent *server;
+  struct sockaddr_in *saddr;
+  do {
+    server = gethostbyname(hostname());
+    saddr = malloc(sizeof(struct sockaddr_in));
+    saddr->sin_family = AF_INET;
+    saddr->sin_port = htons(port);
+    memcpy((void*) &saddr->sin_addr.s_addr, (void*) server->h_addr, server->h_length);
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+      error("socked connection failed");
+      return;
+    }
+  } while (connect(sockfd, (struct sockaddr*) saddr, sizeof(struct sockaddr_in)) < 0);
+  write(sockfd, (const void*) &buffer, 1);
 }
 
 void mute_lights() {
